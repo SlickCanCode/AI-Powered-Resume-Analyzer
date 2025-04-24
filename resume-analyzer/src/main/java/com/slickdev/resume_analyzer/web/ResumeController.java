@@ -24,17 +24,12 @@ public class ResumeController {
 
     ResumeServiceImpl resumeService;
     
-    @PostMapping("/upload")
+    @PostMapping("/analyze-resume")
     public ResponseEntity<HttpStatus> uploadResume(@RequestParam("file") MultipartFile file) {
         resumeService.parseFile(file);
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/{id}/analyze")
-    public ResponseEntity<String> analyzeResume(@RequestBody String entity, @PathVariable Long id) {
-        
-        return new ResponseEntity<>(resumeService.findUploadedResume(id).getContent(),HttpStatus.OK);
-    }
     
     
 }
