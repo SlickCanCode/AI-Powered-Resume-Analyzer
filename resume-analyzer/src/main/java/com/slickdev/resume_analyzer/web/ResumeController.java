@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/resume")
 public class ResumeController {
 
     ResumeServiceImpl resumeService;
