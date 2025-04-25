@@ -62,7 +62,9 @@ public class ResumeServiceImpl implements ResumeService{
             byte[] data = file.getBytes();
             String parsedContent = handler.toString();
             
-             saveResume(new UploadedResume(fileName, fileType, data, parsedContent));
+            if (!resumeRepository.existsByContent(parsedContent)) {
+                     saveResume(new UploadedResume(fileName, fileType, data, parsedContent));
+            }
             
         }catch (Exception e) {
             e.printStackTrace();

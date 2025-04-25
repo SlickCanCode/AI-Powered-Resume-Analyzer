@@ -5,4 +5,5 @@ import com.slickdev.resume_analyzer.entities.UploadedResume;
 
 public interface ResumeRepository extends JpaRepository<UploadedResume, Long>{
     
+    boolean existsByContent(String content);
 }

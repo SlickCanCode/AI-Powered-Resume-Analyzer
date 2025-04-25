@@ -8,5 +8,5 @@ public class SecurityConstants {
     public static final String REGISTER_PATH = "/user/register"; // Public path that clients can use to register.
     public static final String UPLOAD_PATH = "/upload";
     public static final String ANALYZE_PATH = "/**/analyze";
-    public static final String RESUME_PATH = "/resume/**";
+    public static final String RESUME_PATH = "/analyze-resume";
 }
