@@ -8,4 +8,5 @@ public interface ResumeService {
     UploadedResume saveResume (UploadedResume resume);
     void parseFile(MultipartFile file);
     UploadedResume findUploadedResume(Long id);
+    String analyzeResume(Long id, String jobDescription);
 }
