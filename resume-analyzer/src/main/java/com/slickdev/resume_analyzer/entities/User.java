@@ -1,6 +1,11 @@
 package com.slickdev.resume_analyzer.entities;
 
 
+import java.util.List;
+import java.util.UUID;
+
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.slickdev.resume_analyzer.validation.SpecialCharactersValidation;
 import com.slickdev.resume_analyzer.validation.email.UniqueEmail;
 import com.slickdev.resume_analyzer.validation.fullname.FullNameLength;
@@ -8,11 +13,12 @@ import com.slickdev.resume_analyzer.validation.password.PasswordLength;
 import com.slickdev.resume_analyzer.validation.username.UniqueUsername;
 import com.slickdev.resume_analyzer.validation.username.UsernameLength;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -32,9 +38,9 @@ import lombok.Setter;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @GeneratedValue()
+    @Column(name = "id", columnDefinition = "BINARY(16)")
+    private UUID id;
 
     @NonNull
     @NotBlank(message = "Fullname cannot be blank")
@@ -57,10 +63,15 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    
     @NonNull
     @NotBlank(message = "Password cannot be blank")
     @PasswordLength
     @Column(name = "password")
     private String password;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UploadedResume> resumes;
 
 }

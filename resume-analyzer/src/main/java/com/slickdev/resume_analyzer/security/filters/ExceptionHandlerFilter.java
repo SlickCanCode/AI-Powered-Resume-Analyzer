@@ -25,7 +25,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter{
             response.getWriter().write("Username or Email does not exist");
             response.getWriter().flush();
         }catch (JWTVerificationException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             
         }catch (RuntimeException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);

@@ -23,6 +23,12 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter{
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader("Authorization");
 
+        String path = request.getServletPath();
+        if (path.equals(SecurityConstants.REGISTER_PATH) || path.equals("/") || path.startsWith("/h2")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (header == null || !header.startsWith(SecurityConstants.BEARER)) {
             filterChain.doFilter(request, response);
             return;

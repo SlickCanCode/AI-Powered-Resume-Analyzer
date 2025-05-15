@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 
 
@@ -28,17 +30,17 @@ public class ResumeController {
     ResumeServiceImpl resumeService;
     
     @PostMapping("/upload")
-    public ResponseEntity<HttpStatus> uploadResume(@RequestParam("file") MultipartFile file) {
-        resumeService.parseFile(file);
-        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    public ResponseEntity<String> uploadResume(@RequestParam("file") MultipartFile file) {
+        return new ResponseEntity<>(resumeService.parseFile(file, null), HttpStatus.ACCEPTED);
     }
 
-    @PostMapping("/{id}/analyze")
-    public ResponseEntity<String> analyzeReume(@PathVariable Long id, @RequestBody String jobDescription) {
-        return new ResponseEntity<>(resumeService.analyzeResume(id, jobDescription), HttpStatus.OK);
+    @PostMapping("/{userId}/upload")
+    public ResponseEntity<String> uploadUserResume(@PathVariable String userId, @RequestParam("file") MultipartFile file) {
+        return new ResponseEntity<>(resumeService.parseFile(file, userId), HttpStatus.ACCEPTED);
     }
-    
 
-    
-    
+    @GetMapping("/analyze/{id}")
+    public ResponseEntity<String> analyzeResume(@RequestBody String jobDescription, @PathVariable String id) {
+        return new ResponseEntity<>(resumeService.analyzeResume(id, jobDescription) ,HttpStatus.OK);
+    }
 }

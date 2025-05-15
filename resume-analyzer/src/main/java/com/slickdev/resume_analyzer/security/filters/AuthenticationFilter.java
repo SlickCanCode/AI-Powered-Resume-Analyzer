@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slickdev.resume_analyzer.requests.LoginRequest;
 import com.slickdev.resume_analyzer.security.SecurityConstants;
 import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
+import com.slickdev.resume_analyzer.service.UserServiceImpl;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,6 +26,8 @@ import lombok.AllArgsConstructor;
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     
     private CustomAuthenticationManager authenticationManager;
+    private UserServiceImpl userService;
+    
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -42,8 +45,9 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
+                String userId = userService.getUserByUsername(authResult.getName()).getId().toString();
         String token = JWT.create()
-                .withSubject(authResult.getName())
+                .withSubject(userId)//puts the user's id in the payload
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
                 .sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
                 response.addHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);

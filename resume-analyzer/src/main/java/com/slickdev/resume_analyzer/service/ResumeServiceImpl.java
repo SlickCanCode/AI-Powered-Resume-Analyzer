@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.slickdev.resume_analyzer.entities.UploadedResume;
+import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
@@ -35,20 +36,43 @@ import lombok.AllArgsConstructor;
 public class ResumeServiceImpl implements ResumeService{
 
     private ResumeRepository resumeRepository;
+    private UserServiceImpl userService;
     private RestTemplate restTemplate;
     
+
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
         return resumeRepository.save(resume);
     }
 
     @Override
-    public UploadedResume findUploadedResume(Long id) {
-        return unwrapUser(resumeRepository.findById(id), id);
+    public UploadedResume findResumeByContentAndUser(User user, String content) {
+        Optional<UploadedResume> resume = resumeRepository.findByUserAndContent(user, content);
+        return unwrapResume(resume, null);
     }
 
     @Override
-    public void parseFile(MultipartFile file) {
+    public UploadedResume findByContent(String content) {
+        Optional<UploadedResume> resume = resumeRepository.findByContent(content);
+        return unwrapResume(resume, null);
+    }
+
+    static UploadedResume unwrapResume(Optional<UploadedResume> entity, UUID id) {
+        if (entity.isPresent()) return entity.get();
+        else throw new EntityNotFoundException(id, UploadedResume.class);
+    }
+
+    private String insertDashes(String raw) {
+    return raw.replaceFirst(
+        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
+        "$1-$2-$3-$4-$5"
+    );
+    }
+
+
+
+    @Override
+    public String parseFile(MultipartFile file, String userId) {
         try (BufferedInputStream inputStream = new BufferedInputStream(file.getInputStream())) {
             inputStream.mark(Integer.MAX_VALUE);
             Tika tika = new Tika();
@@ -72,27 +96,40 @@ public class ResumeServiceImpl implements ResumeService{
             String fileName =file.getOriginalFilename();
             byte[] data = file.getBytes();
             String parsedContent = handler.toString();
+                
+                if (userId != null)//for authenticated users 
+                {
+                    User user = userService.getUser(userId);
+                    if (!resumeRepository.existsByUserAndContent(user, parsedContent)) {
+                        UploadedResume resume = saveResume(new UploadedResume(fileName, fileType, parsedContent, data, user));
+                         user.getResumes().add(resume);
+                    }
+                    UploadedResume resume = findResumeByContentAndUser(user, parsedContent);
+                    return "{\"resumeId\": \"" + resume.getId().toString() + "\"}";
+                } 
+                 //For Unauthenticated users
+                 if (!resumeRepository.existsByContent(parsedContent)) { 
+                        saveResume(new UploadedResume(fileName, fileType, parsedContent, data)); //save in the database only if the content doesn't exists in the database
+                 }
+                 
+                 return "{\"resumeId\": \"" + findByContent(parsedContent).getId().toString() + "\"}";//return the resume's id nevertheless
             
-            if (!resumeRepository.existsByContent(parsedContent)) {
-                      saveResume(new UploadedResume(fileName, fileType, data, parsedContent));
-            }
             
         }catch (Exception e) {
             e.printStackTrace();
             throw new FileProcessingException(e.getMessage());
         }
-        
     }
 
-    static UploadedResume unwrapUser(Optional<UploadedResume> entity, Long id) {
-        if (entity.isPresent()) return entity.get();
-        else throw new EntityNotFoundException(id, UploadedResume.class);
-    }
 
+
+
+    
     @Override
     @SuppressWarnings("unchecked")
-    public String analyzeResume(Long id, String jobDescription) {
-        String resumeContent = unwrapUser(resumeRepository.findById(id), id).getContent();
+    public String analyzeResume(String id, String jobDescription) {
+        UUID refinedId = UUID.fromString(insertDashes(id));
+        String resumeContent = unwrapResume(resumeRepository.findById(refinedId), refinedId).getContent();
         String api_URL = ServiceConstants.API_URL;
 
             
@@ -147,7 +184,7 @@ public class ResumeServiceImpl implements ResumeService{
     
     }
 
-    return "No response from Gemini.";
+    return "An Unexpected Error Occured!, pls try again";
 } 
 
 }

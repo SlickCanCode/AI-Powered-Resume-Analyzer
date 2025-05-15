@@ -1,12 +1,15 @@
 package com.slickdev.resume_analyzer.service;
 
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.slickdev.resume_analyzer.entities.UploadedResume;
+import com.slickdev.resume_analyzer.entities.User;
 
 public interface ResumeService {
     UploadedResume saveResume (UploadedResume resume);
-    void parseFile(MultipartFile file);
-    UploadedResume findUploadedResume(Long id);
-    String analyzeResume(Long id, String jobDescription);
+    String parseFile(MultipartFile file, String userId);
+    String analyzeResume(String id, String jobDescription);
+    UploadedResume findResumeByContentAndUser(User user, String content);
+    UploadedResume findByContent(String content);
 }
