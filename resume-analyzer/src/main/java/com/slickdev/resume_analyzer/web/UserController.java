@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.slickdev.resume_analyzer.entities.User;
-import com.slickdev.resume_analyzer.entities.UserResponseDto;
-import com.slickdev.resume_analyzer.service.UserServiceImpl;
+import com.slickdev.resume_analyzer.reponses.UserResponseDto;
+import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -35,6 +35,11 @@ public class UserController {
     public ResponseEntity<HttpStatus> saveUser(@Valid @RequestBody User user) {
         userService.saveUser(user);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @GetMapping("/search/{userNameOrEmail}")
+    public ResponseEntity<User> findUserByUsernameOrEmail(@PathVariable String userNameOrEmail) {
+        return new ResponseEntity<>(userService.getUserByUsernameOrEmail(userNameOrEmail), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/{id}")

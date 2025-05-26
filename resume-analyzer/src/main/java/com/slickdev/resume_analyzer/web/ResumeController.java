@@ -4,7 +4,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.slickdev.resume_analyzer.service.ResumeServiceImpl;
+import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
+import com.slickdev.resume_analyzer.service.impl.ResumeServiceImpl;
 
 import lombok.AllArgsConstructor;
 
@@ -30,12 +31,12 @@ public class ResumeController {
     ResumeServiceImpl resumeService;
     
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadResume(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ResumeIdResponse> uploadResume(@RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, null), HttpStatus.ACCEPTED);
     }
 
     @PostMapping("/{userId}/upload")
-    public ResponseEntity<String> uploadUserResume(@PathVariable String userId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ResumeIdResponse> uploadUserResume(@PathVariable String userId, @RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, userId), HttpStatus.ACCEPTED);
     }
 

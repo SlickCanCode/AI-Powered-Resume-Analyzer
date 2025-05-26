@@ -10,7 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.slickdev.resume_analyzer.security.filters.AuthenticationFilter;
 import com.slickdev.resume_analyzer.security.filters.ExceptionHandlerFilter;
 import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
-import com.slickdev.resume_analyzer.service.UserServiceImpl;
+import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
 import com.slickdev.resume_analyzer.security.filters.JWTAuthorizationFilter;
 
 

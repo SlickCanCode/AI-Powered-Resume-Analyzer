@@ -14,7 +14,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slickdev.resume_analyzer.requests.LoginRequest;
 import com.slickdev.resume_analyzer.security.SecurityConstants;
 import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
+<<<<<<< HEAD
 import com.slickdev.resume_analyzer.service.UserServiceImpl;
+=======
+import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
+>>>>>>> d23caacd874ed00720d3108859c9b44cd16a1cc8
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -45,7 +49,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
+<<<<<<< HEAD
                 String userId = userService.getUserByUsername(authResult.getName()).getId().toString();
+=======
+                String userId = userService.getUserByUsernameOrEmail(authResult.getName()).getId().toString();
+>>>>>>> d23caacd874ed00720d3108859c9b44cd16a1cc8
         String token = JWT.create()
                 .withSubject(userId)//puts the user's id in the payload
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
