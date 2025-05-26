@@ -9,11 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.slickdev.resume_analyzer.entities.User;
-<<<<<<< HEAD
-import com.slickdev.resume_analyzer.service.UserServiceImpl;
-=======
+
 import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
->>>>>>> d23caacd874ed00720d3108859c9b44cd16a1cc8
+
 
 import lombok.AllArgsConstructor;
 
@@ -31,11 +29,8 @@ public class CustomAuthenticationManager implements AuthenticationManager{
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-<<<<<<< HEAD
-        User user = userService.getUserByUsername(authentication.getName());
-=======
+
         User user = userService.getUserByUsernameOrEmail(authentication.getName());
->>>>>>> d23caacd874ed00720d3108859c9b44cd16a1cc8
         if (!passwordEncoder.matches(authentication.getCredentials().toString(), user.getPassword())) {
             throw new BadCredentialsException("You provided an incorrect password!");
         }
