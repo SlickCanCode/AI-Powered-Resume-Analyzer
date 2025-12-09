@@ -38,7 +38,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             return authenticationManager.authenticate(authentication);
 
         }catch (IOException e) {
-            throw new RuntimeException("Failed to parse login request", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 

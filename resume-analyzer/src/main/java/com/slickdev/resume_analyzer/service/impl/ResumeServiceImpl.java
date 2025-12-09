@@ -131,11 +131,10 @@ public class ResumeServiceImpl implements ResumeService{
                 } 
                  //For Unauthenticated users
                  if (!resumeRepository.existsByContent(parsedContent)) { 
-                        saveResume(new UploadedResume(fileName, fileType, parsedContent, data)); //save in the database only if the content doesn't exists in the database
+                       return new ResumeIdResponse(saveResume(new UploadedResume(fileName, fileType, parsedContent, data)).getId().toString()); //save in the database only if the content doesn't exists in the database
                  }
                  
-                 return new ResumeIdResponse(findByContent(parsedContent).getId().toString());//return the resume's id nevertheless 
-            
+                 return new ResumeIdResponse(findByContent(parsedContent).getId().toString());//return the resume's id 
             
         }catch (IOException | TikaException | SAXException e) {
             Throwable cause = e.getCause() != null ? e.getCause() : e;

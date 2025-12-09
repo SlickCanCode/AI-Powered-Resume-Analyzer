@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
-import com.slickdev.resume_analyzer.service.impl.ResumeServiceImpl;
+import com.slickdev.resume_analyzer.service.ResumeService;
 
 import lombok.AllArgsConstructor;
 
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequestMapping("/resume")
 public class ResumeController {
 
-    ResumeServiceImpl resumeService;
+    private final ResumeService resumeService;
     
     @PostMapping("/upload")
     public ResponseEntity<ResumeIdResponse> uploadResume(@RequestParam("file") MultipartFile file) {
@@ -44,4 +44,7 @@ public class ResumeController {
     public ResponseEntity<String> analyzeResume(@RequestBody String jobDescription, @PathVariable String id) {
         return new ResponseEntity<>(resumeService.analyzeResume(id, jobDescription) ,HttpStatus.OK);
     }
+
+    //Create /all path for resume histories
+    //There should be analysis history.
 }
