@@ -37,7 +37,6 @@ import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
-
 import lombok.AllArgsConstructor;
 
 @Service
@@ -143,21 +142,23 @@ public class ResumeServiceImpl implements ResumeService{
         }
     }
 
+
+
     @Override
     public String analyzeResume(String id, String jobDescription) {
         String resumeContent = findById(id).getContent();
         String api_URL = ServiceConstants.API_URL;
 
-        //Build the request
+        //Build request
         String prompt = promptBuilder.buildPrompt(resumeContent, jobDescription);
-        Map<String,Object> requestBody = buildRequestBody(prompt);//creates a map, json like structure
+        Map<String,Object> requestBody = buildRequestBody(prompt);
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        //Wrap body and headers together
+        //Wraping body and headers together
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-        //send the request
+        //send request
         try {
                     ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                         api_URL, 
@@ -175,11 +176,15 @@ public class ResumeServiceImpl implements ResumeService{
     }
  } 
 
+
+
     private Map<String, Object> buildRequestBody(String prompt) {
             Map<String, String> textPart = Map.of("text", prompt);
             Map<String, Object> content = Map.of("parts", List.of(textPart));
             return Map.of("contents", List.of(content));
         }
+
+
 
     @SuppressWarnings("unchecked")
     private String extractTextFromResponse(ResponseEntity<Map<String, Object>> response) {

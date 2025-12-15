@@ -32,12 +32,12 @@ public class ResumeController {
     
     @PostMapping("/upload")
     public ResponseEntity<ResumeIdResponse> uploadResume(@RequestParam("file") MultipartFile file) {
-        return new ResponseEntity<>(resumeService.parseFile(file, null), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(resumeService.parseFile(file, null), HttpStatus.OK);
     }
 
     @PostMapping("/{userId}/upload")
     public ResponseEntity<ResumeIdResponse> uploadUserResume(@PathVariable String userId, @RequestParam("file") MultipartFile file) {
-        return new ResponseEntity<>(resumeService.parseFile(file, userId), HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(resumeService.parseFile(file, userId), HttpStatus.OK);
     }
 
     @GetMapping("/analyze/{id}")

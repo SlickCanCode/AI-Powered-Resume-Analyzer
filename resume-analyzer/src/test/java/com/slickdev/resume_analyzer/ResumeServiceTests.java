@@ -98,8 +98,6 @@ public class ResumeServiceTests {
 
     }
 
-
-
     @Test
     public void saveResume_ShouldReturnSavedResume() {
         when(repository.save(any(UploadedResume.class))).thenReturn(resume);
