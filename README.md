@@ -1,6 +1,6 @@
 # 📄 Resume Analyzer
 
-A **Backend, AI‑powered Resume Analyzer System** designed to help job seekers improve their resumes and better align them with specific job roles. This project demonstrates strong backend engineering, clean API design, thoughtful documentation, and practical AI integration.
+A **Java Backend, AI‑powered Resume Analyzer System** designed to help job seekers improve their resumes and better align them with specific job roles. This project demonstrates strong backend engineering, clean API design, thoughtful documentation, and practical AI integration.
 
 ---
 
