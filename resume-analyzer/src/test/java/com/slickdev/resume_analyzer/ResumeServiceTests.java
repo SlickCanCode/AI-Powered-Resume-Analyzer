@@ -1,5 +1,6 @@
 package com.slickdev.resume_analyzer;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,12 +11,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,6 +101,15 @@ public class ResumeServiceTests {
             "This is the file content".getBytes() // file content
         );
 
+        //Malformed PDF
+        byte[] malformedPdf = (
+                "%PDF-1.4\n" +
+                "1 0 obj\n" +
+                "<< /Type /Catalog >>\n" +
+                "endobj\n"
+        ).getBytes();
+        //InputStream
+        InputStream inputStream = new ByteArrayInputStream(malformedPdf);
     }
 
     @Test
@@ -276,5 +290,20 @@ public class ResumeServiceTests {
             );
         assertTrue(ex.getMessage().contains("Connection Error"));
     }
+
+    @Test
+    public void isStrictPdf_shouldThrowIOException_whenPDFisMalformed() {
+        byte[] malformedPdf = (
+                "%PDF-1.4\n" +
+                "1 0 obj\n" +
+                "<< /Type /Catalog >>\n" +
+                "endobj\n"
+        ).getBytes();
+        //InputStream
+        InputStream inputStream = new ByteArrayInputStream(malformedPdf);
+        boolean result = resumeService.isStrictPdf(inputStream);
+        assertFalse(result);
+    }
+    
 }
 

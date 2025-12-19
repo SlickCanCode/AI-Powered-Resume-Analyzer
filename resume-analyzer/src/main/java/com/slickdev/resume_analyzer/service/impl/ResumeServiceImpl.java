@@ -2,8 +2,16 @@ package com.slickdev.resume_analyzer.service.impl;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.io.RandomAccessRead;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
+import org.apache.pdfbox.io.RandomAccessReadBufferedFile;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -86,7 +94,20 @@ public class ResumeServiceImpl implements ResumeService{
     );
     }
 
+    public boolean isStrictPdf(InputStream inputStream) {
+        try (PDDocument document = Loader.loadPDF(new RandomAccessReadBuffer(inputStream))) {
+            document.getDocumentCatalog(); // force catalog parsing
+            document.getPages().getCount(); // force page tree parsing
 
+            for (PDPage page : document.getPages()) { //Extra Strict
+                    page.getContents();
+                }
+            return true;
+
+        } catch (IOException e) {
+            return false;
+        }
+    }
 
     @Override
     public ResumeIdResponse parseFile(MultipartFile file, String userId) {
@@ -95,7 +116,17 @@ public class ResumeServiceImpl implements ResumeService{
             Tika tika = new Tika();
             String fileType = tika.detect(inputStream);
 
-            inputStream.reset();
+            //Extra Security for malformed pdfs 
+            if(fileType.equals("application/pdf")) {
+                inputStream.reset();
+                log.info("PDF DETECTED");
+                if(!isStrictPdf(inputStream)) {
+                    throw new FileProcessingException("Unable to parse file: Bad/Malformed pdf detected");
+                } else {
+                    log.info("PDF PASSED VALIDATION");
+                }
+                inputStream.reset();
+            }
 
             //parse content
             AutoDetectParser parser = new AutoDetectParser();

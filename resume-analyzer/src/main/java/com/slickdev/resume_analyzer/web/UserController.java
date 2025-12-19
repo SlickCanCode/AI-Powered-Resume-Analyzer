@@ -11,9 +11,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
+import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.UserService;
 
 import jakarta.validation.Valid;
@@ -47,5 +52,8 @@ public class UserController {
     }   
 
     //Create put mapping for user to edit their info 
+
+
+
 
 }

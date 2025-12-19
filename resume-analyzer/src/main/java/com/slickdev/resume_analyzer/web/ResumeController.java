@@ -31,7 +31,7 @@ public class ResumeController {
     private final ResumeService resumeService;
     
     @PostMapping("/upload")
-    public ResponseEntity<ResumeIdResponse> uploadResume(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ResumeIdResponse> uploadResume(@RequestParam MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, null), HttpStatus.OK);
     }
 
