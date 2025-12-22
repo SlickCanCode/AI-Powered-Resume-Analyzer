@@ -43,6 +43,7 @@ import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
+import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
@@ -248,7 +249,7 @@ public class ResumeServiceTests {
                 any(ParameterizedTypeReference.class)
         )).thenReturn(responseEntity);
 
-        String response = resumeService.analyzeResume(TestConstants.FAKE_UUID_STRING, TestConstants.JOB_DESCRIPTION);
+        ResumeAnalysisResponse response = resumeService.analyzeResume(TestConstants.FAKE_UUID_STRING, TestConstants.JOB_DESCRIPTION);
 
         assertEquals("AI analysis result", response);
     }

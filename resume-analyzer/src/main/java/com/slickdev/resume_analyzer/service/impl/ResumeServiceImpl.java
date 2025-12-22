@@ -37,10 +37,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
+import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
@@ -117,16 +120,16 @@ public class ResumeServiceImpl implements ResumeService{
             String fileType = tika.detect(inputStream);
 
             //Extra Security for malformed pdfs 
-            if(fileType.equals("application/pdf")) {
-                inputStream.reset();
-                log.info("PDF DETECTED");
-                if(!isStrictPdf(inputStream)) {
-                    throw new FileProcessingException("Unable to parse file: Bad/Malformed pdf detected");
-                } else {
-                    log.info("PDF PASSED VALIDATION");
-                }
-                inputStream.reset();
-            }
+            // if(fileType.equals("application/pdf")) {
+            //     inputStream.reset();
+            //     log.info("PDF DETECTED");
+            //     if(!isStrictPdf(inputStream)) {
+            //         throw new FileProcessingException("Unable to parse file: Bad/Malformed pdf detected");
+            //     } else {
+            //         log.info("PDF PASSED VALIDATION");
+            //     }
+            //     inputStream.reset();
+            // }
 
             //parse content
             AutoDetectParser parser = new AutoDetectParser();
@@ -176,7 +179,7 @@ public class ResumeServiceImpl implements ResumeService{
 
 
     @Override
-    public String analyzeResume(String id, String jobDescription) {
+    public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
         String resumeContent = findById(id).getContent();
         String api_URL = ServiceConstants.API_URL;
 
@@ -196,14 +199,22 @@ public class ResumeServiceImpl implements ResumeService{
                         HttpMethod.POST, 
                         entity, 
                         new ParameterizedTypeReference<Map<String, Object>>() {});
-
-                    return extractTextFromResponse(response);
+                        ObjectMapper mapper = new ObjectMapper();
+                        String aiResponse =  extractTextFromResponse(response);
+                        String aiResponseCleaned = aiResponse
+                                .replaceAll("(?s)```.*?\\n", "") 
+                                .replaceAll("```", "")           
+                                .trim();
+                        ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
+                        return result;
                 
         } catch (HttpClientErrorException | HttpServerErrorException e) {
             throw new RuntimeException("Gemini API Error: " + e.getMessage());
     } catch (ResourceAccessException e) {
     // Timeout, no connection
     throw new RuntimeException("Connection Error: " + e.getMessage());
+    } catch (JsonProcessingException e) {
+        throw new RuntimeException("Mapper Error: " + e.getMessage());
     }
  } 
 
