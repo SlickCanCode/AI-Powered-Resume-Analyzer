@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,15 +100,6 @@ public class ResumeServiceTests {
             "This is the file content".getBytes() // file content
         );
 
-        //Malformed PDF
-        byte[] malformedPdf = (
-                "%PDF-1.4\n" +
-                "1 0 obj\n" +
-                "<< /Type /Catalog >>\n" +
-                "endobj\n"
-        ).getBytes();
-        //InputStream
-        InputStream inputStream = new ByteArrayInputStream(malformedPdf);
     }
 
     @Test
@@ -211,8 +200,7 @@ public class ResumeServiceTests {
     public void parseFile_ShouldSaveResumeAndReturnIdAsResponse_ForUnAuthenticatedUsers() {
         when(repository.save(any(UploadedResume.class))).thenReturn(resume);
         when(repository.existsByContent(anyString())).thenReturn(false);
-        when(repository.findByContent( anyString())).thenReturn(Optional.of(resume));
-
+    
         ResumeIdResponse responseId = resumeService.parseFile(file, null);
 
         assertNotNull(responseId);
@@ -236,7 +224,7 @@ public class ResumeServiceTests {
         when(promptBuilder.buildPrompt(anyString(), anyString())).thenReturn(TestConstants.PROMPT_STRING);
 
         //AI response
-        Map<String, String> textPart = Map.of("text", "AI analysis result");
+        Map<String, String> textPart = Map.of("text", TestConstants.AI_RESPONSE);
         Map<String, Object> content = Map.of("parts", List.of(textPart));
         Map<String, Object> candidate = Map.of("content", content);
         Map<String, Object> responseBody = Map.of("candidates", List.of(candidate));
@@ -250,8 +238,7 @@ public class ResumeServiceTests {
         )).thenReturn(responseEntity);
 
         ResumeAnalysisResponse response = resumeService.analyzeResume(TestConstants.FAKE_UUID_STRING, TestConstants.JOB_DESCRIPTION);
-
-        assertEquals("AI analysis result", response);
+        assertEquals(TestConstants.score, response.getScore());
     }
 
     @Test

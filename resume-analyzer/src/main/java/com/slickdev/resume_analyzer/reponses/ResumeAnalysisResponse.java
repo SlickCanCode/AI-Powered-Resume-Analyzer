@@ -14,5 +14,4 @@ public class ResumeAnalysisResponse {
     private List<String> weaknesses;
     private List<String> improvementSuggestions;
 
-
 }

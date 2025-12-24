@@ -1,15 +1,13 @@
 package com.slickdev.resume_analyzer.service.impl;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
 import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.io.MemoryUsageSetting;
-import org.apache.pdfbox.io.RandomAccessRead;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
-import org.apache.pdfbox.io.RandomAccessReadBufferedFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.tika.Tika;
@@ -117,19 +115,19 @@ public class ResumeServiceImpl implements ResumeService{
         try (BufferedInputStream inputStream = new BufferedInputStream(file.getInputStream())) {
             inputStream.mark(Integer.MAX_VALUE);
             Tika tika = new Tika();
+            byte[] bytes = inputStream.readAllBytes();
             String fileType = tika.detect(inputStream);
 
-            //Extra Security for malformed pdfs 
-            // if(fileType.equals("application/pdf")) {
-            //     inputStream.reset();
-            //     log.info("PDF DETECTED");
-            //     if(!isStrictPdf(inputStream)) {
-            //         throw new FileProcessingException("Unable to parse file: Bad/Malformed pdf detected");
-            //     } else {
-            //         log.info("PDF PASSED VALIDATION");
-            //     }
-            //     inputStream.reset();
-            // }
+            inputStream.reset();
+            // Extra Security for malformed pdfs 
+            if(fileType.equals("application/pdf")) {
+                log.info("PDF DETECTED");
+                if(!isStrictPdf(inputStream)) {
+                    throw new FileProcessingException("Unable to parse file: Bad/Malformed pdf detected");
+                } else {
+                    log.info("PDF PASSED VALIDATION");
+                }
+            }
 
             //parse content
             AutoDetectParser parser = new AutoDetectParser();
@@ -143,7 +141,10 @@ public class ResumeServiceImpl implements ResumeService{
             BodyContentHandler handler = new BodyContentHandler(-1); //For unlimited body size
             Metadata metadata = new Metadata();
 
-            parser.parse(inputStream, handler, metadata, context);
+            //parse file with safestream
+            InputStream safeStream = new ByteArrayInputStream(bytes);
+            parser.parse(safeStream, handler, metadata, context);
+
             String fileName =file.getOriginalFilename();
             byte[] data = file.getBytes();
             String parsedContent = handler.toString();
@@ -199,12 +200,15 @@ public class ResumeServiceImpl implements ResumeService{
                         HttpMethod.POST, 
                         entity, 
                         new ParameterizedTypeReference<Map<String, Object>>() {});
+                    
                         ObjectMapper mapper = new ObjectMapper();
                         String aiResponse =  extractTextFromResponse(response);
                         String aiResponseCleaned = aiResponse
-                                .replaceAll("(?s)```.*?\\n", "") 
-                                .replaceAll("```", "")           
+                                .replaceAll("(?s)```\\w*\\n", "")
+                                .replaceAll("```", "")
+                                .replaceFirst("(?i)^json:\\s*", "")
                                 .trim();
+                        System.out.println(aiResponseCleaned);
                         ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
                         return result;
                 
@@ -238,7 +242,8 @@ public class ResumeServiceImpl implements ResumeService{
                 List<Map<String, String>> parts = (List<Map<String, String>>) content.get("parts");
                 return parts.get(0).get("text");
             }
-        }
+        } 
+        
         return "An Unexpected Error Occured!, pls try again";
     }
 
