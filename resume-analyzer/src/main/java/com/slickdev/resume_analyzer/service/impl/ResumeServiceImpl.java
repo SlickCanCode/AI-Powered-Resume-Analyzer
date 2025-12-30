@@ -18,8 +18,6 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.sax.BodyContentHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +50,6 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ResumeServiceImpl implements ResumeService{
 
-    private static final Logger log = LoggerFactory.getLogger(ResumeServiceImpl.class);
     private final ResumeRepository resumeRepository;
     private final UserServiceImpl userService;
     private final RestTemplate restTemplate;
@@ -121,11 +118,8 @@ public class ResumeServiceImpl implements ResumeService{
             inputStream.reset();
             // Extra Security for malformed pdfs 
             if(fileType.equals("application/pdf")) {
-                log.info("PDF DETECTED");
                 if(!isStrictPdf(inputStream)) {
                     throw new FileProcessingException("Unable to parse file: Bad/Malformed pdf detected");
-                } else {
-                    log.info("PDF PASSED VALIDATION");
                 }
             }
 
@@ -149,8 +143,6 @@ public class ResumeServiceImpl implements ResumeService{
             byte[] data = file.getBytes();
             String parsedContent = handler.toString();
                 
-                if (userId != null)//for authenticated users 
-                {
                     User user = userService.getUser(userId);
                     if (!resumeRepository.existsByUserAndContent(user, parsedContent)) {
                         UploadedResume resume = saveResume(new UploadedResume(fileName, fileType, parsedContent, data, user));
@@ -162,17 +154,9 @@ public class ResumeServiceImpl implements ResumeService{
                     }
                     UploadedResume resume = findResumeByContentAndUser(user, parsedContent);
                     return new ResumeIdResponse(resume.getId().toString());
-                } 
-                 //For Unauthenticated users
-                 if (!resumeRepository.existsByContent(parsedContent)) { 
-                       return new ResumeIdResponse(saveResume(new UploadedResume(fileName, fileType, parsedContent, data)).getId().toString()); //save in the database only if the content doesn't exists in the database
-                 }
-                 
-                 return new ResumeIdResponse(findByContent(parsedContent).getId().toString());//return the resume's id 
+
             
         }catch (IOException | TikaException | SAXException e) {
-            Throwable cause = e.getCause() != null ? e.getCause() : e;
-            log.error("Failed to parse file", cause);
             throw new FileProcessingException("Unable to parse file:" + e.getMessage());
         }
     }
@@ -181,7 +165,8 @@ public class ResumeServiceImpl implements ResumeService{
 
     @Override
     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
-        String resumeContent = findById(id).getContent();
+        UploadedResume resume = findById(id);
+        String resumeContent = resume.getContent();
         String api_URL = ServiceConstants.API_URL;
 
         //Build request
@@ -202,13 +187,15 @@ public class ResumeServiceImpl implements ResumeService{
                         new ParameterizedTypeReference<Map<String, Object>>() {});
                     
                         ObjectMapper mapper = new ObjectMapper();
+
                         String aiResponse =  extractTextFromResponse(response);
                         String aiResponseCleaned = aiResponse
                                 .replaceAll("(?s)```\\w*\\n", "")
                                 .replaceAll("```", "")
                                 .replaceFirst("(?i)^json:\\s*", "")
                                 .trim();
-                        System.out.println(aiResponseCleaned);
+                        resume.setAnalysis(aiResponseCleaned);
+                        resumeRepository.save(resume);
                         ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
                         return result;
                 
@@ -221,7 +208,6 @@ public class ResumeServiceImpl implements ResumeService{
         throw new RuntimeException("Mapper Error: " + e.getMessage());
     }
  } 
-
 
 
     private Map<String, Object> buildRequestBody(String prompt) {

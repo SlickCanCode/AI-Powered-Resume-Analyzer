@@ -36,7 +36,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationFilter authenticationFilter = new AuthenticationFilter(authentication, userService, jwtService);
-        authenticationFilter.setFilterProcessesUrl("/authenticate");
+        authenticationFilter.setFilterProcessesUrl("/api/v1/auth/login");
 
         http
         .cors(Customizer.withDefaults())
@@ -44,8 +44,6 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/h2/**").permitAll()
             .requestMatchers(HttpMethod.POST, SecurityConstants.REGISTER_PATH).permitAll()
-            .requestMatchers(HttpMethod.POST, SecurityConstants.RESUME_UPLOAD_PATH).permitAll()
-            .requestMatchers(HttpMethod.POST, SecurityConstants.RESUME_ANALYZE_PATH).permitAll()
             .anyRequest().authenticated()
         ).addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
         .addFilter(authenticationFilter)

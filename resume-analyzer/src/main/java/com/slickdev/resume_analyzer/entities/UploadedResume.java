@@ -36,9 +36,13 @@ public class UploadedResume {
     private byte[] data;
 
     @Lob
-    @NotBlank(message = "For some reason the content appears blank")
+    @NotBlank(message = "Content should not be blank")
     @Column(name = "File_Content")
     private String content;    
+
+    @Lob
+    @Column(name = "analysis")
+    private String analysis;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "user_id", referencedColumnName = "id")

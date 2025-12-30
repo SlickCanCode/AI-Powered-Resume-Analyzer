@@ -9,11 +9,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
+import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
-
+import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.UserService;
 
 import jakarta.validation.Valid;
@@ -24,36 +28,34 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @AllArgsConstructor
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
+    private final ResumeService resumeService;
+
+    @PostMapping("")
+    public ResponseEntity<AuthResponse> saveUser(@Valid @RequestBody User user) {
+        return new ResponseEntity<AuthResponse>(userService.registerUser(user), HttpStatus.CREATED);
+    }
 
     @GetMapping("/{id}")
 	public ResponseEntity<UserResponseDto> getUser(@PathVariable String id) {
 		return new ResponseEntity<>(userService.getUserinfo(id), HttpStatus.OK);
 	}
-
-    @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> saveUser(@Valid @RequestBody User user) {
-        return new ResponseEntity<AuthResponse>(userService.registerUser(user), HttpStatus.CREATED);
-    }
-
-    @GetMapping("/verify-token")
-    public ResponseEntity<HttpStatus> verifyToken() {
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
     
-
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable String id) {
        userService.deleteUser(id);
        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }   
 
-    //Create put mapping for user to edit their info 
+    //Create put mapping here for user to edit their info 
 
-
-
+    @PostMapping("/{id}/resumes")
+    public ResponseEntity<ResumeIdResponse> uploadUserResume(@PathVariable String id, @RequestParam("file") MultipartFile file) {
+        return new ResponseEntity<>(resumeService.parseFile(file, id), HttpStatus.OK);
+    }
+    //Get mapping for user resumes
 
 }
