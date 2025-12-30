@@ -1,7 +1,5 @@
 package com.slickdev.resume_analyzer.reponses;
 
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,8 +7,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class UserResponseDto{
-    private UUID id;
-    private String userName;
-    private String email;
+public class AuthResponse {
+    String jwt;
+    UserResponseDto user;
 }

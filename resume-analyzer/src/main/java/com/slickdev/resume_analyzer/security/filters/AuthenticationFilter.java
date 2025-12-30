@@ -1,20 +1,22 @@
 package com.slickdev.resume_analyzer.security.filters;
 
 import java.io.IOException;
-import java.util.Date;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.exception.ApiError;
+import com.slickdev.resume_analyzer.reponses.AuthResponse;
+import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.requests.LoginRequest;
-import com.slickdev.resume_analyzer.security.SecurityConstants;
 import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
-import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
+import com.slickdev.resume_analyzer.service.JwtService;
+import com.slickdev.resume_analyzer.service.UserService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +28,8 @@ import lombok.AllArgsConstructor;
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     
     private CustomAuthenticationManager authenticationManager;
-    private UserServiceImpl userService;
+    private final UserService userService;
+    private final JwtService jwtService;
     
 
     @Override
@@ -46,21 +49,26 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
 
-                String userId = userService.getUserByUsernameOrEmail(authResult.getName()).getId().toString();
+                User user = userService.getUserByUsernameOrEmail(authResult.getName());
 
-        String token = JWT.create()
-                .withSubject(userId)//puts the user's id in the payload
-                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.TOKEN_EXPIRATION))
-                .sign(Algorithm.HMAC512(SecurityConstants.SECRET_KEY));
-                response.addHeader(SecurityConstants.AUTHORIZATION, SecurityConstants.BEARER + token);
+        String token = jwtService.generateToken(user);
+                AuthResponse response2 = new AuthResponse(token, new UserResponseDto(user.getId(), user.getUserName(), user.getEmail()));
+
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.setContentType("application/json");
+            new ObjectMapper().writeValue(response.getWriter(), response2);
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.getWriter().write(failed.getMessage());
-                response.getWriter().flush();
+                ApiError error = new ApiError(
+                HttpServletResponse.SC_UNAUTHORIZED,
+                failed.getMessage()
+            );
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            new ObjectMapper().writeValue(response.getWriter(), error);
     }
    
 }

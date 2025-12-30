@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
+import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
+import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.UserService;
 
 
@@ -30,6 +32,20 @@ public class UserServiceImpl implements UserService{
         this.userRepository = userRepository;
     }
 
+    JwtService jwtService;
+    @Autowired
+    public void setJwtservice(JwtService jService) {
+        this.jwtService = jService;
+    }
+
+
+    @Override
+    public AuthResponse registerUser(User user) {
+        User savedUser = saveUser(user);
+        String jwt = jwtService.generateToken(savedUser);
+        UserResponseDto userResponse= new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
+        return new AuthResponse(jwt, userResponse);
+    }
 
     @Override
     public User saveUser(User user) {
@@ -48,9 +64,8 @@ public class UserServiceImpl implements UserService{
     public UserResponseDto getUserinfo(String id) {
         UUID refinedId = UUID.fromString(formatUUID(id));
         User user = unwrapUser(userRepository.findById(refinedId), refinedId);
-        return new UserResponseDto(user.getId(), user.getFullName(), user.getUserName(), user.getEmail());
+        return new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
     }
-    
 
     @Override
     public User getUserByUsernameOrEmail(String usernameOrEmail) {

@@ -3,7 +3,6 @@ package com.slickdev.resume_analyzer.security.manager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -32,7 +31,7 @@ public class CustomAuthenticationManager implements AuthenticationManager{
 
         User user = userService.getUserByUsernameOrEmail(authentication.getName());
         if (!passwordEncoder.matches(authentication.getCredentials().toString(), user.getPassword())) {
-            throw new BadCredentialsException("You provided an incorrect password!");
+            throw new RuntimeException("You provided an incorrect password!");
         }
         return new UsernamePasswordAuthenticationToken(authentication.getName(), user.getPassword());
     }

@@ -83,7 +83,6 @@ public class ResumeServiceTests {
         resume.setId(fakeID);
 
         user = new User(
-            TestConstants.FAKEUSER_FULLNAME_STRING,
             TestConstants.FAKEUSER_USERNAME_STRING,
             TestConstants.FAKEUSER_EMAIL_STRING,
             TestConstants.FAKEUSER_PASSWORD_STRING

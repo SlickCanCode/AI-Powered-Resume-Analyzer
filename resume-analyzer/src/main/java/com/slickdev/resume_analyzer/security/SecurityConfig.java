@@ -16,7 +16,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.slickdev.resume_analyzer.security.filters.AuthenticationFilter;
 import com.slickdev.resume_analyzer.security.filters.ExceptionHandlerFilter;
 import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
-import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
+import com.slickdev.resume_analyzer.service.JwtService;
+import com.slickdev.resume_analyzer.service.UserService;
 import com.slickdev.resume_analyzer.security.filters.JWTAuthorizationFilter;
 
 
@@ -28,12 +29,13 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class SecurityConfig {
 
-    CustomAuthenticationManager authentication;
-    UserServiceImpl userService;
+    private CustomAuthenticationManager authentication;
+    private final UserService  userService;
+    private final JwtService  jwtService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authentication, userService);
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authentication, userService, jwtService);
         authenticationFilter.setFilterProcessesUrl("/authenticate");
 
         http
@@ -62,6 +64,8 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+
+        config.setExposedHeaders(List.of("Location"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

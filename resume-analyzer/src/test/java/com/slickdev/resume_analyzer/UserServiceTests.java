@@ -43,7 +43,6 @@ public class UserServiceTests {
     @BeforeEach
     void setup() {
         user = new User(
-            TestConstants.FAKEUSER_FULLNAME_STRING,
             TestConstants.FAKEUSER_USERNAME_STRING,
             TestConstants.FAKEUSER_EMAIL_STRING,
             TestConstants.FAKEUSER_PASSWORD_STRING
@@ -60,7 +59,7 @@ public class UserServiceTests {
 
         User savedUser = userService.saveUser(user);
 
-        assertEquals(user.getFullName(), savedUser.getFullName());
+        assertEquals(user.getUserName(), savedUser.getUserName());
         assertEquals(TestConstants.FAKE_ENCODED_PASSWORD, savedUser.getPassword());
         verify(passwordEncoder).encode(TestConstants.FAKEUSER_PASSWORD_STRING);
     }
@@ -93,8 +92,8 @@ public class UserServiceTests {
 
         assertNotNull(userByEmail);
         assertNotNull(userByUsername);
-        assertEquals(user.getFullName(), userByEmail.getFullName());
-        assertEquals(user.getFullName(), userByUsername.getFullName());
+        assertEquals(user.getUserName(), userByEmail.getUserName());
+        assertEquals(user.getUserName(), userByUsername.getUserName());
     }
 
     @Test
@@ -113,7 +112,7 @@ public class UserServiceTests {
         UserResponseDto userInfo = userService.getUserinfo(TestConstants.FAKE_UUID_STRING);
 
         assertNotNull(userInfo);
-        assertEquals(user.getFullName(), userInfo.getFullName());
+        assertEquals(user.getUserName(), userInfo.getUserName());
     }
 
     @Test

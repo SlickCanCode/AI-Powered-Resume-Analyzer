@@ -2,8 +2,6 @@ package com.slickdev.resume_analyzer.web;
 
 
 
-import java.net.URI;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 
 import com.slickdev.resume_analyzer.service.UserService;
@@ -20,6 +19,7 @@ import com.slickdev.resume_analyzer.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
+
 
 
 @AllArgsConstructor
@@ -34,12 +34,16 @@ public class UserController {
 		return new ResponseEntity<>(userService.getUserinfo(id), HttpStatus.OK);
 	}
 
-    @PostMapping("/register")
-    public ResponseEntity<HttpStatus> saveUser(@Valid @RequestBody User user) {
-        userService.saveUser(user);
-        URI location = URI.create("/user/" + user.getId());
-        return ResponseEntity.created(location).build();
+    @PostMapping("/signup")
+    public ResponseEntity<AuthResponse> saveUser(@Valid @RequestBody User user) {
+        return new ResponseEntity<AuthResponse>(userService.registerUser(user), HttpStatus.CREATED);
     }
+
+    @GetMapping("/verify-token")
+    public ResponseEntity<HttpStatus> verifyToken() {
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable String id) {

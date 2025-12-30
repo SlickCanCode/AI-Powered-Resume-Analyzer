@@ -8,7 +8,6 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.slickdev.resume_analyzer.validation.SpecialCharactersValidation;
 import com.slickdev.resume_analyzer.validation.email.UniqueEmail;
-import com.slickdev.resume_analyzer.validation.fullname.FullNameLength;
 import com.slickdev.resume_analyzer.validation.password.PasswordLength;
 import com.slickdev.resume_analyzer.validation.username.UniqueUsername;
 import com.slickdev.resume_analyzer.validation.username.UsernameLength;
@@ -41,12 +40,6 @@ public class User {
     @GeneratedValue()
     @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
-
-    @NonNull
-    @NotBlank(message = "Fullname cannot be blank")
-    @FullNameLength
-    @Column(name = "fullName")
-    private String fullName;
 
     @NonNull
     @NotBlank(message = "Username cannot be blank") 

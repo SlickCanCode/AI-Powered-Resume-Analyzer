@@ -5,6 +5,8 @@ import java.io.IOException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slickdev.resume_analyzer.exception.ApiError;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 
 import jakarta.servlet.FilterChain;
@@ -21,18 +23,25 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter{
         try{
             filterChain.doFilter(request, response);
         } catch (EntityNotFoundException e) {
+            ApiError error = new ApiError(
+                HttpServletResponse.SC_NOT_FOUND,
+                "Username or Email does not exist"
+            );
+
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write("Username or Email does not exist");
-            response.getWriter().flush();
+            response.setContentType("application/json");
+            new ObjectMapper().writeValue(response.getWriter(), error);
+
         }catch (JWTVerificationException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            
         }catch (RuntimeException e) {
+            ApiError error = new ApiError(
+                HttpServletResponse.SC_BAD_REQUEST,
+                e.getMessage()
+            );
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(e.getMessage());
-            response.getWriter().flush();
-        }catch (Exception e) {
-            
+            response.setContentType("application/json");
+            new ObjectMapper().writeValue(response.getWriter(), error);
         }
     }
 }
