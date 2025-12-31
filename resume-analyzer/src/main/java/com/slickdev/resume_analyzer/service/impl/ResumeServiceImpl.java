@@ -10,7 +10,6 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
@@ -50,10 +49,12 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class ResumeServiceImpl implements ResumeService{
 
+    private final CloudinaryService cloudinaryService;
     private final ResumeRepository resumeRepository;
     private final UserServiceImpl userService;
     private final RestTemplate restTemplate;
     private final PromptBuilder promptBuilder;
+
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
@@ -111,13 +112,23 @@ public class ResumeServiceImpl implements ResumeService{
     public ResumeIdResponse parseFile(MultipartFile file, String userId) {
         try (BufferedInputStream inputStream = new BufferedInputStream(file.getInputStream())) {
             inputStream.mark(Integer.MAX_VALUE);
-            Tika tika = new Tika();
+            String fileType = file.getContentType();
             byte[] bytes = inputStream.readAllBytes();
-            String fileType = tika.detect(inputStream);
+            InputStream safeStream = new ByteArrayInputStream(bytes);
 
-            inputStream.reset();
+            //Necessary Checks
+            if (fileType == null) {
+                throw new IllegalArgumentException("File type not supported");
+            }
+            boolean isPdf = fileType.equals("application/pdf");
+            boolean isImage = fileType.startsWith("image/");
+            if (!isPdf && !isImage) {
+                throw new IllegalArgumentException("Only PDF and image files are allowed");
+            }
+
             // Extra Security for malformed pdfs 
-            if(fileType.equals("application/pdf")) {
+            inputStream.reset();
+            if(isPdf) {
                 if(!isStrictPdf(inputStream)) {
                     throw new FileProcessingException("Unable to parse file: Bad/Malformed pdf detected");
                 }
@@ -135,22 +146,22 @@ public class ResumeServiceImpl implements ResumeService{
             BodyContentHandler handler = new BodyContentHandler(-1); //For unlimited body size
             Metadata metadata = new Metadata();
 
-            //parse file with safestream
-            InputStream safeStream = new ByteArrayInputStream(bytes);
+
             parser.parse(safeStream, handler, metadata, context);
 
             String fileName =file.getOriginalFilename();
-            byte[] data = file.getBytes();
             String parsedContent = handler.toString();
+            String secure_url = cloudinaryService.uploadResume(file, userId, fileType);
                 
                     User user = userService.getUser(userId);
                     if (!resumeRepository.existsByUserAndContent(user, parsedContent)) {
-                        UploadedResume resume = saveResume(new UploadedResume(fileName, fileType, parsedContent, data, user));
+                        UploadedResume resume = saveResume(new UploadedResume(fileName, fileType, parsedContent, secure_url, user));
                             if (user.getResumes()!=null ) { //avoid null pointer exception
                                 user.getResumes().add(resume);
                             } else {
                                 user.setResumes(Arrays.asList(resume));
                             }
+                            resumeRepository.save(resume);
                     }
                     UploadedResume resume = findResumeByContentAndUser(user, parsedContent);
                     return new ResumeIdResponse(resume.getId().toString());

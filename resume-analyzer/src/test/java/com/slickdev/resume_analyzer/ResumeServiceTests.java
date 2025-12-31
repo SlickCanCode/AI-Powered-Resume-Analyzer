@@ -31,7 +31,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
@@ -45,6 +44,7 @@ import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
+import com.slickdev.resume_analyzer.service.impl.CloudinaryService;
 import com.slickdev.resume_analyzer.service.impl.PromptBuilder;
 import com.slickdev.resume_analyzer.service.impl.ResumeServiceImpl;
 import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
@@ -64,19 +64,22 @@ public class ResumeServiceTests {
     @Mock
     private PromptBuilder promptBuilder;
 
+    @Mock
+    private CloudinaryService cloudinaryService;
+
     @InjectMocks
     private ResumeServiceImpl resumeService;
+
 
     private UploadedResume resume;
     private User user;
     private UUID fakeID;
-    private MultipartFile file;
 
 
     @BeforeEach
     void setup() {
         resume = new UploadedResume(
-            TestConstants.RESUME_FILENAME, TestConstants.RESUME_CONTENT_TYPE, TestConstants.RESUME_CONTENT, TestConstants.RESUME_DATA
+            TestConstants.RESUME_FILENAME, TestConstants.RESUME_CONTENT_TYPE, TestConstants.RESUME_CONTENT, TestConstants.SOURCE_URL, user
         );
         
         fakeID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
@@ -91,15 +94,8 @@ public class ResumeServiceTests {
         user.setId(fakeID);
         resume.setUser(user);
 
-        //Working Multipartfile 
-        file = new MockMultipartFile(
-            "file",                       // name of the parameter
-            "test-file.txt",             // original filename
-            "text/plain",                // content type
-            "This is the file content".getBytes() // file content
-        );
-
     }
+
 
     @Test
     public void saveResume_ShouldReturnSavedResume() {
@@ -174,8 +170,9 @@ public class ResumeServiceTests {
         when(repository.save(any(UploadedResume.class))).thenReturn(resume);
         when(repository.findByUserAndContent(any(User.class), anyString())).thenReturn(Optional.of(resume));
         when(userService.getUser(anyString())).thenReturn(user);
+        when(cloudinaryService.uploadResume(any(MultipartFile.class),anyString(),anyString())).thenReturn("source_url");
 
-        ResumeIdResponse responseId = resumeService.parseFile(file, TestConstants.FAKE_UUID_STRING);
+        ResumeIdResponse responseId = resumeService.parseFile(TestConstants.pdfFile, TestConstants.FAKE_UUID_STRING);
 
         assertNotNull(responseId);
         verify(userService).getUser(TestConstants.FAKE_UUID_STRING);
@@ -187,22 +184,12 @@ public class ResumeServiceTests {
         when(repository.existsByUserAndContent(any(User.class), anyString())).thenReturn(true);
         when(repository.findByUserAndContent(any(User.class), anyString())).thenReturn(Optional.of(resume));
         when(userService.getUser(anyString())).thenReturn(user);
+                when(cloudinaryService.uploadResume(any(MultipartFile.class),anyString(),anyString())).thenReturn("source_url");
 
-        ResumeIdResponse responseId = resumeService.parseFile(file, TestConstants.FAKE_UUID_STRING);
+        ResumeIdResponse responseId = resumeService.parseFile(TestConstants.pdfFile, TestConstants.FAKE_UUID_STRING);
 
         assertNotNull(responseId);
         verify(userService).getUser(TestConstants.FAKE_UUID_STRING);
-        assertEquals(responseId.getResumeId(), resume.getId().toString());
-    }
-    
-    @Test
-    public void parseFile_ShouldSaveResumeAndReturnIdAsResponse_ForUnAuthenticatedUsers() {
-        when(repository.save(any(UploadedResume.class))).thenReturn(resume);
-        when(repository.existsByContent(anyString())).thenReturn(false);
-    
-        ResumeIdResponse responseId = resumeService.parseFile(file, null);
-
-        assertNotNull(responseId);
         assertEquals(responseId.getResumeId(), resume.getId().toString());
     }
 

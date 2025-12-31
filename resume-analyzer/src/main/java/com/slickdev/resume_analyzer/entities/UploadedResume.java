@@ -31,9 +31,8 @@ public class UploadedResume {
     @Column(name = "File_type")
     private String contentType;
 
-    @Lob
-    @Column(name = "file_data")
-    private byte[] data;
+    @Column(name = "Source_url")
+    private String source_url;
 
     @Lob
     @NotBlank(message = "Content should not be blank")
@@ -48,19 +47,13 @@ public class UploadedResume {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    public UploadedResume (String fileName, String contentType, String content, byte[] data, User user ) {
+
+    public UploadedResume (String fileName, String contentType, String content, String source_url, User user ) {
         this.filename = fileName;
         this.contentType = contentType;
         this.content = content;
-        this.data = data;
+        this.source_url = source_url;
         this.user = user;
     }
 
-    public UploadedResume (String fileName, String contentType, String content, byte[] data) {
-        this.filename = fileName;
-        this.contentType = contentType;
-        this.content = content;
-        this.data = data;
-    }
-   
 }
