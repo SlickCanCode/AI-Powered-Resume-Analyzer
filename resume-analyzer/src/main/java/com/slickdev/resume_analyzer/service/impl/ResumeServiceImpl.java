@@ -40,6 +40,7 @@ import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
+import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
@@ -55,6 +56,7 @@ public class ResumeServiceImpl implements ResumeService{
     private final RestTemplate restTemplate;
     private final PromptBuilder promptBuilder;
 
+    private ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
@@ -106,6 +108,28 @@ public class ResumeServiceImpl implements ResumeService{
         } catch (IOException e) {
             return false;
         }
+    }
+
+    @Override
+    public List<ResumeResponse> getUserResumes(String userId) {
+        List<UploadedResume> userResumes = resumeRepository.findAllByUser(userService.getUser(userId));
+        List<ResumeResponse> resumeResponses = new ArrayList<>();
+
+        for (int i = 0; i < userResumes.size();i++) {
+
+            String fileName = userResumes.get(i).getFilename();
+            String sourceUrl = userResumes.get(i).getSource_url();
+            ResumeAnalysisResponse analysis = null;
+            if (userResumes.get(i).getAnalysis() != null) {
+                try {
+                    analysis = mapper.readValue(userResumes.get(i).getAnalysis(), ResumeAnalysisResponse.class);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("Unable to parse analysis");
+                }
+            }
+            resumeResponses.add(new ResumeResponse(fileName,sourceUrl,analysis));
+        }
+        return resumeResponses;
     }
 
     @Override
@@ -196,8 +220,6 @@ public class ResumeServiceImpl implements ResumeService{
                         HttpMethod.POST, 
                         entity, 
                         new ParameterizedTypeReference<Map<String, Object>>() {});
-                    
-                        ObjectMapper mapper = new ObjectMapper();
 
                         String aiResponse =  extractTextFromResponse(response);
                         String aiResponseCleaned = aiResponse

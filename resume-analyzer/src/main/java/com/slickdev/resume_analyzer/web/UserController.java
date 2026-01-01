@@ -2,6 +2,8 @@ package com.slickdev.resume_analyzer.web;
 
 
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
+import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.ResumeService;
@@ -62,6 +65,10 @@ public class UserController {
     public ResponseEntity<ResumeIdResponse> uploadUserResume(@PathVariable String id, @RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, id), HttpStatus.OK);
     }
-    //Get mapping for user resumes
+    
+    @GetMapping("/{id}/resumes")
+    public ResponseEntity<List<ResumeResponse>> getAllresumes(@PathVariable String id) {
+        return new ResponseEntity<>(resumeService.getUserResumes(id), HttpStatus.OK);
+    }
 
 }

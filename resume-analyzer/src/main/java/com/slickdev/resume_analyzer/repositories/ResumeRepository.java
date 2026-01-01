@@ -1,4 +1,5 @@
 package com.slickdev.resume_analyzer.repositories;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,5 +14,6 @@ public interface ResumeRepository extends JpaRepository<UploadedResume, UUID>{
     boolean existsByContent(String content);
     Optional<UploadedResume> findByUserAndContent(User user, String content);
     Optional<UploadedResume> findByContent(String content);
+    List<UploadedResume> findAllByUser(User user);
     
 }
