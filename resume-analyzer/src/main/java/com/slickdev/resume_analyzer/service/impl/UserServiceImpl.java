@@ -9,15 +9,20 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
+import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.UserService;
 
+import jakarta.transaction.Transactional;
+
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService{
     
     BCryptPasswordEncoder passwordEncoder;
@@ -78,6 +83,29 @@ public class UserServiceImpl implements UserService{
     public void deleteUser(String id) {
          getUser(id);
         userRepository.deleteById(UUID.fromString(formatUUID(id)));
+    }
+
+    @Override
+    public UserResponseDto updateUser(String id, UpdateuserRequest request) {
+        UUID refinedId = UUID.fromString(formatUUID(id));
+        User user = unwrapUser(userRepository.findById(refinedId), refinedId);
+
+    if (!user.getEmail().equals(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("Email");
+        }
+    }
+
+    // Username uniqueness check
+    if (!user.getUserName().equals(request.getUserName())) {
+        if (userRepository.existsByUserName(request.getUserName())) {
+            throw new DuplicateResourceException("Username");
+        }
+    }
+
+        user.setEmail(request.getEmail());
+        user.setUserName(request.getUserName());
+        return new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
     }
 
     static User unwrapUser(Optional<User> entity, UUID id) {

@@ -17,12 +17,15 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
+import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -43,14 +46,17 @@ public class UserController {
 	public ResponseEntity<UserResponseDto> getUser(@PathVariable String id) {
 		return new ResponseEntity<>(userService.getUserinfo(id), HttpStatus.OK);
 	}
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDto> editUser(@PathVariable String id, @Valid @RequestBody UpdateuserRequest request) {
+        return  new ResponseEntity<>(userService.updateUser(id,request), HttpStatus.OK);
+    }
     
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable String id) {
        userService.deleteUser(id);
        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }   
-
-    //Create put mapping here for user to edit their info 
 
     @PostMapping("/{id}/resumes")
     public ResponseEntity<ResumeIdResponse> uploadUserResume(@PathVariable String id, @RequestParam("file") MultipartFile file) {
