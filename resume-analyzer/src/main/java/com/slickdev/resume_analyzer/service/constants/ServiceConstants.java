@@ -15,9 +15,9 @@ Focus on job match, skills alignment, missing keywords, and ATS relevance. Be co
 
 {
   "score": 0–100,
-  "strengths": [],
-  "weaknesses": [],
-  "improvementSuggestions": [],
+  "strengths": [Max 10–12 words per point],
+  "weaknesses": [Max 12–15 words per point],
+  "improvementSuggestions": [Max 15–18 words per point],
   "jobRecommendations": [
     { "platform": "LinkedIn", "link": "https://..." },
     { "platform": "Indeed", "link": "https://..." }
