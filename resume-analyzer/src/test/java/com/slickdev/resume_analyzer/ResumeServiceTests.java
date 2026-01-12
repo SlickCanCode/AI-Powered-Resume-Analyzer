@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -35,6 +37,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slickdev.resume_analyzer.Constants.TestConstants;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
@@ -42,6 +46,7 @@ import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
+import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
 import com.slickdev.resume_analyzer.service.impl.CloudinaryService;
@@ -67,34 +72,48 @@ public class ResumeServiceTests {
     @Mock
     private CloudinaryService cloudinaryService;
 
+    @Mock
+    private ObjectMapper mapper;
+
+    @Mock
+    private ApplicationContext context;
+
     @InjectMocks
     private ResumeServiceImpl resumeService;
 
-
-    private UploadedResume resume;
-    private User user;
-    private UUID fakeID;
+    
 
 
-    @BeforeEach
-    void setup() {
-        resume = new UploadedResume(
-            TestConstants.RESUME_FILENAME, TestConstants.RESUME_CONTENT_TYPE, TestConstants.RESUME_CONTENT, TestConstants.SOURCE_URL, user
-        );
-        
-        fakeID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
-        resume.setId(fakeID);
+private UploadedResume resume;
+private User user;
+private UUID fakeID;
+private List<UploadedResume> resumeHistory;
 
-        user = new User(
-            TestConstants.FAKEUSER_USERNAME_STRING,
-            TestConstants.FAKEUSER_EMAIL_STRING,
-            TestConstants.FAKEUSER_PASSWORD_STRING
-        );
-        fakeID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
-        user.setId(fakeID);
-        resume.setUser(user);
+@BeforeEach
+void setup() {
+    fakeID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
 
-    }
+    user = new User(
+        TestConstants.FAKEUSER_USERNAME_STRING,
+        TestConstants.FAKEUSER_EMAIL_STRING,
+        TestConstants.FAKEUSER_PASSWORD_STRING
+    );
+    user.setId(fakeID);
+
+    resume = new UploadedResume(
+        TestConstants.RESUME_FILENAME,
+        TestConstants.RESUME_CONTENT_TYPE,
+        TestConstants.RESUME_CONTENT,
+        TestConstants.SOURCE_URL,
+        user
+    );
+    resume.setId(fakeID);
+    resume.setAnalysis(TestConstants.AI_RESPONSE_CLEANED);
+
+    resumeHistory = new ArrayList<>();
+    resumeHistory.add(resume);
+}
+
 
 
     @Test
@@ -277,6 +296,16 @@ public class ResumeServiceTests {
         InputStream inputStream = new ByteArrayInputStream(malformedPdf);
         boolean result = resumeService.isStrictPdf(inputStream);
         assertFalse(result);
+    }
+
+    @Test
+    public void getUserResumes_shouldReturnUsersResumeList() {
+        when(userService.getUser(anyString())).thenReturn(user);
+        when(repository.findAllByUser(user)).thenReturn(resumeHistory);
+
+        List<ResumeResponse> history = resumeService.getUserResumes(TestConstants.FAKE_UUID_STRING);
+        assertEquals(resume.getFilename(), history.get(0).getName());
+
     }
     
 }

@@ -28,6 +28,13 @@ public class TestConstants {
                     "  \"weaknesses\": [\"Bad Grammar\"],\n" +
                     "  \"improvementSuggestions\": [\"Improve Grammar\"]\n" +
                     "}";
+
+    public static String AI_RESPONSE_CLEANED = "{\n" +
+                    "  \"score\": 30,\n" +
+                    "  \"strengths\": [\"Good Skill\"],\n" +
+                    "  \"weaknesses\": [\"Bad Grammar\"],\n" +
+                    "  \"improvementSuggestions\": [\"Improve Grammar\"]\n" +
+                    "}";
     public static final int score = 30;
     public static final List<String> strengths = List.of("Good Skill");
     public static final List<String> weaknesses = List.of("Bad Grammar");

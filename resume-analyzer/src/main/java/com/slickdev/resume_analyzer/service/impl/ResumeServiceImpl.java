@@ -17,6 +17,7 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.sax.BodyContentHandler;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -55,8 +56,9 @@ public class ResumeServiceImpl implements ResumeService{
     private final UserServiceImpl userService;
     private final RestTemplate restTemplate;
     private final PromptBuilder promptBuilder;
+    private final ApplicationContext context;
 
-    private ObjectMapper mapper = new ObjectMapper();
+
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
@@ -114,6 +116,7 @@ public class ResumeServiceImpl implements ResumeService{
     public List<ResumeResponse> getUserResumes(String userId) {
         List<UploadedResume> userResumes = resumeRepository.findAllByUser(userService.getUser(userId));
         List<ResumeResponse> resumeResponses = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
 
         for (int i = 0; i < userResumes.size();i++) {
 
@@ -122,6 +125,7 @@ public class ResumeServiceImpl implements ResumeService{
             ResumeAnalysisResponse analysis = null;
             if (userResumes.get(i).getAnalysis() != null) {
                 try {
+                    System.out.println(userResumes.get(i).getAnalysis());
                     analysis = mapper.readValue(userResumes.get(i).getAnalysis(), ResumeAnalysisResponse.class);
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException("Unable to parse analysis");
@@ -229,7 +233,10 @@ public class ResumeServiceImpl implements ResumeService{
                                 .replaceFirst("(?i)^json:\\s*", "")
                                 .trim();
                         resume.setAnalysis(aiResponseCleaned);
+                        boolean exists = context.containsBean("mapper");
+                        System.out.println("ObjectMapper present: " + exists);
                         resumeRepository.save(resume);
+                        ObjectMapper mapper = new ObjectMapper();
                         ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
                         return result;
                 

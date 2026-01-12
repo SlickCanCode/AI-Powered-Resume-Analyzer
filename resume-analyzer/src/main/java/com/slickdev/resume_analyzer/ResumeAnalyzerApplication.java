@@ -7,6 +7,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+
+
+
 @SpringBootApplication
 public class ResumeAnalyzerApplication {
 
@@ -18,6 +21,7 @@ public class ResumeAnalyzerApplication {
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {

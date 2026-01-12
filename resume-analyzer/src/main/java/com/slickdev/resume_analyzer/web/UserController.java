@@ -54,7 +54,7 @@ public class UserController {
     public ResponseEntity<UserResponseDto> editUser(@PathVariable String id, @Valid @RequestBody UpdateuserRequest request) {
         return  new ResponseEntity<>(userService.updateUser(id,request), HttpStatus.OK);
     }
-    
+
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> deleteUser(@PathVariable String id) {
        userService.deleteUser(id);
@@ -65,7 +65,7 @@ public class UserController {
     public ResponseEntity<ResumeIdResponse> uploadUserResume(@PathVariable String id, @RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, id), HttpStatus.OK);
     }
-    
+
     @GetMapping("/{id}/resumes")
     public ResponseEntity<List<ResumeResponse>> getAllresumes(@PathVariable String id) {
         return new ResponseEntity<>(resumeService.getUserResumes(id), HttpStatus.OK);
