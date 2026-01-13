@@ -305,8 +305,9 @@ void setup() {
 
         List<ResumeResponse> history = resumeService.getUserResumes(TestConstants.FAKE_UUID_STRING);
         assertEquals(resume.getFilename(), history.get(0).getName());
-
     }
+
+    
     
 }
 

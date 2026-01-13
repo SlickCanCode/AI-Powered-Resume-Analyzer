@@ -19,9 +19,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.slickdev.resume_analyzer.Constants.TestConstants;
 import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
+import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -139,6 +141,34 @@ public class UserServiceTests {
 
         assertThrows(EntityNotFoundException.class, () ->
             userService.deleteUser(TestConstants.FAKE_WRONG_UUID_STRING)
+        );
+    }
+
+    @Test
+    public void updateUser_shouldReturnUpdatedUserinfo() {
+        when(repository.findById(fakeID)).thenReturn(Optional.of(user));
+        when(repository.existsByEmail(anyString())).thenReturn(false);
+        when(repository.existsByUserName(anyString())).thenReturn(false);
+
+        UpdateuserRequest request = new UpdateuserRequest();
+        request.setEmail("someEmail@gmail.com");
+        request.setUserName("user112");
+        UserResponseDto response =  userService.updateUser(TestConstants.FAKE_UUID_STRING, request);
+
+        assertEquals(request.getUserName(), response.getUserName());
+    }
+
+    @Test
+    public void updateUser_shouldThrowException_whenUniqueinfoAlreadyExists() {
+        when(repository.findById(fakeID)).thenReturn(Optional.of(user));
+        when(repository.existsByEmail(anyString())).thenReturn(true);
+        
+        UpdateuserRequest request = new UpdateuserRequest();
+        request.setEmail("someEmail@gmail.com");
+        request.setUserName("user112");
+
+            assertThrows(DuplicateResourceException.class, () ->
+            userService.updateUser(TestConstants.FAKE_UUID_STRING, request)
         );
     }
 }
