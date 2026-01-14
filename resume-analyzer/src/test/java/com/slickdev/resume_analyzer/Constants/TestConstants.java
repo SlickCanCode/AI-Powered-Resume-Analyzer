@@ -1,6 +1,7 @@
 package com.slickdev.resume_analyzer.Constants;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,7 +12,7 @@ public class TestConstants {
     public static final String FAKE_WRONG_UUID_STRING = "543216781234123412341234567890ab";
     public static final String FAKEUSER_EMAIL_STRING = "johndoe@gmail.com";
     public static final String FAKEUSER_FULLNAME_STRING = "John Doe";
-    public static final String FAKEUSER_USERNAME_STRING = "joe";
+    public static final String FAKEUSER_USERNAME_STRING = "joey123";
     public static final String FAKEUSER_PASSWORD_STRING = "somePassword123";
     public static final String FAKE_ENCODED_PASSWORD = "encodedPassword";
 
@@ -64,4 +65,8 @@ public class TestConstants {
                 pdfBytes
         );
 
+    public static final String signinRequest = "{\"userName\":\"slickfeet\", \"email\":\"johndoe123@gmail.com\", \"password\":\"johndoe123\"}";
+    public static final String badSigninRequest = "{\"fullName\":\"joh\", \"userName\":\"sli\", \"email\":\"johndoe123\", \"password\":\"jo\"}";
+    public static final UUID FAKE_UUID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
+    public static final String EDITUSER_REQUEST = "{\"userName\":\"slickfeet\", \"email\":\"johndoe123@gmail.com\"}";
 }

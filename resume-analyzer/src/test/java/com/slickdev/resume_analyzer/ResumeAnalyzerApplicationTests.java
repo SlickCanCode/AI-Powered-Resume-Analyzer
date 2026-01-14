@@ -6,16 +6,27 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import com.slickdev.resume_analyzer.Constants.TestConstants;
+import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.repositories.UserRepository;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class ResumeAnalyzerApplicationTests {
+
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	MockMvc mockMvc;
@@ -26,26 +37,120 @@ class ResumeAnalyzerApplicationTests {
 	}
 
 	@Test
-	void testSuccessfulRegisterUser_shouldReturnSuccessfulandLocationHeader() throws Exception{
+	void testSuccessfulRegisterUser_shouldReturnSuccessfulandAuthResponseBody() throws Exception{
 
-		RequestBuilder request = MockMvcRequestBuilders.post("/user/register")
+		RequestBuilder request = MockMvcRequestBuilders.post("/api/v1/users")
 			.contentType(APPLICATION_JSON)
-			.content("{\"fullName\":\"john doe\", \"userName\":\"slickfeet\", \"email\":\"johndoe123@gmail.com\", \"password\":\"johndoe123\"}");
+			.content(TestConstants.signinRequest);
 
 			mockMvc.perform(request)
 				.andExpect(status().is2xxSuccessful())
-				.andExpect(header().exists("Location"));
+				.andExpect(content().contentType(APPLICATION_JSON));
 	}
 
 	@Test
 	void testUnsuccessfulRegisterUser_shouldReturnError() throws Exception{
-		RequestBuilder request = MockMvcRequestBuilders.post("/user/register")
+		RequestBuilder request = MockMvcRequestBuilders.post("/api/v1/users")
 			.contentType(APPLICATION_JSON)
-			.content("{\"fullName\":\"joh\", \"userName\":\"sli\", \"email\":\"johndoe123\", \"password\":\"jo\"}");
+			.content(TestConstants.badSigninRequest);
 
 			mockMvc.perform(request)
 				.andExpect(status().isBadRequest())
 				.andExpect(content().contentType(APPLICATION_JSON));
 	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testSuccessfulGetUser_shouldReturnUserInfo() throws Exception{
+		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
+		userRepository.save(user);
+		RequestBuilder request = MockMvcRequestBuilders.get("/api/v1/users/"+ user.getId().toString());
+
+		mockMvc.perform(request)
+			.andExpect(status().is2xxSuccessful())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testUnSuccessfulGetUser_shouldReturnUserNotFoundError() throws Exception{
+		RequestBuilder request = MockMvcRequestBuilders.get("/api/v1/users/"+ TestConstants.FAKE_UUID_STRING);
+
+		mockMvc.perform(request)
+			.andExpect(status().isNotFound())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testSuccessfulEditUser_shouldReturnEditedUserinfo() throws Exception{
+		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
+		userRepository.save(user);
+		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/"+ user.getId().toString())
+			.contentType(APPLICATION_JSON)
+			.content(TestConstants.EDITUSER_REQUEST);
+
+		mockMvc.perform(request)
+			.andExpect(status().is2xxSuccessful())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testUnSuccessfulEditUser_shouldReturnErrorIfInfoAlreadyInUse() throws Exception{
+		User user1 = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
+		User user2 = new User("slickfeet", "someemail@gmail.com", TestConstants.FAKEUSER_PASSWORD_STRING);
+		userRepository.save(user1);
+		userRepository.save(user2);
+		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/"+ user1.getId().toString())
+			.contentType(APPLICATION_JSON)
+			.content(TestConstants.EDITUSER_REQUEST);
+
+		mockMvc.perform(request)
+			.andExpect(status().isBadRequest())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testSuccesfulDeleteUser_shouldDeleteUser() throws Exception{
+		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
+		userRepository.save(user);
+		RequestBuilder request = MockMvcRequestBuilders.delete("/api/v1/users/"+ user.getId().toString());
+
+		mockMvc.perform(request)
+			.andExpect(status().is2xxSuccessful());
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testUnSuccesfulDeleteUser_shouldThrowErrorIfUserNotFound() throws Exception{
+		RequestBuilder request = MockMvcRequestBuilders.delete("/api/v1/users/"+ TestConstants.FAKE_UUID_STRING);
+
+		mockMvc.perform(request)
+			.andExpect(status().isNotFound())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testUploadUserResume_shouldReturnResumeId() throws Exception{
+		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
+		userRepository.save(user);
+		MockMultipartFile pdfFile = new MockMultipartFile(
+			"file",              
+			"resume.pdf",
+			"application/pdf",
+			"Some PDF content".getBytes()
+		);
+		RequestBuilder request = MockMvcRequestBuilders.multipart("/api/v1/users/{userId}/resumes",user.getId().toString())
+			.file(pdfFile)
+    		.contentType(MediaType.MULTIPART_FORM_DATA);
+			
+		mockMvc.perform(request)
+			.andExpect(status().is2xxSuccessful())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
 
 }
