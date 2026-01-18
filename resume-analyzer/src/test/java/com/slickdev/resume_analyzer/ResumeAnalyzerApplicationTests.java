@@ -29,7 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("dev")
 @AutoConfigureMockMvc
 class ResumeAnalyzerApplicationTests {
 

@@ -233,8 +233,6 @@ public class ResumeServiceImpl implements ResumeService{
                                 .replaceFirst("(?i)^json:\\s*", "")
                                 .trim();
                         resume.setAnalysis(aiResponseCleaned);
-                        boolean exists = context.containsBean("mapper");
-                        System.out.println("ObjectMapper present: " + exists);
                         resumeRepository.save(resume);
                         ObjectMapper mapper = new ObjectMapper();
                         ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
