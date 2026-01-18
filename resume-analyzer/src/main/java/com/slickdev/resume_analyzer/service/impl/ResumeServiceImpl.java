@@ -56,7 +56,6 @@ public class ResumeServiceImpl implements ResumeService{
     private final UserServiceImpl userService;
     private final RestTemplate restTemplate;
     private final PromptBuilder promptBuilder;
-    private final ApplicationContext context;
 
 
 
@@ -125,7 +124,6 @@ public class ResumeServiceImpl implements ResumeService{
             ResumeAnalysisResponse analysis = null;
             if (userResumes.get(i).getAnalysis() != null) {
                 try {
-                    System.out.println(userResumes.get(i).getAnalysis());
                     analysis = mapper.readValue(userResumes.get(i).getAnalysis(), ResumeAnalysisResponse.class);
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException("Unable to parse analysis");
