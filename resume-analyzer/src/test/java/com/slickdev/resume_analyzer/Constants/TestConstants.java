@@ -19,8 +19,7 @@ public class TestConstants {
     public static final String SOURCE_URL = "https://some_url";
     public static final String RESUME_FILENAME = "Test_resume";
     public static final String RESUME_CONTENT_TYPE = ".PDF";
-    public static final String RESUME_CONTENT = "Some_Content";
-    public static final byte[] RESUME_DATA = "Test1234".getBytes();
+    public static final String RESUME_CONTENT = "Some Content";
     public static final String JOB_DESCRIPTION = "Backend Developer";
     public static final String PROMPT_STRING = "Prompt built with resume and job description";
     public static final String AI_RESPONSE = "```{\n" +
@@ -68,5 +67,7 @@ public class TestConstants {
     public static final String signinRequest = "{\"userName\":\"slickfeet\", \"email\":\"johndoe123@gmail.com\", \"password\":\"johndoe123\"}";
     public static final String badSigninRequest = "{\"fullName\":\"joh\", \"userName\":\"sli\", \"email\":\"johndoe123\", \"password\":\"jo\"}";
     public static final UUID FAKE_UUID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
-    public static final String EDITUSER_REQUEST = "{\"userName\":\"slickfeet\", \"email\":\"johndoe123@gmail.com\"}";
+    public static final String BAD_EDITUSER_REQ = "{\"userName\":\"slicky\", \"email\":\"johndoe12@gmail.com\"}";
+    public static final String GOOD_EDITUSER_REQ = "{\"userName\":\"Userame\", \"email\":\"johndoe1@gmail.com\"}";    
+    public static final String JOB_DESCRIPTION_REQUEST = "{\"jobDescription\":\"juiorDev\"}";
 }

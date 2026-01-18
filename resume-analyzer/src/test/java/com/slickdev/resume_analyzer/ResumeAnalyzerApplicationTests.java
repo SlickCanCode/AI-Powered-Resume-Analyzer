@@ -2,6 +2,8 @@ package com.slickdev.resume_analyzer;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,19 +11,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.slickdev.resume_analyzer.Constants.TestConstants;
+import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 class ResumeAnalyzerApplicationTests {
 
@@ -29,7 +37,34 @@ class ResumeAnalyzerApplicationTests {
 	private UserRepository userRepository;
 
 	@Autowired
+	private ResumeRepository resumeRepository;
+
+	@Autowired
 	MockMvc mockMvc;
+
+	private UploadedResume resume;
+	private User user;
+
+	@BeforeEach
+	void setup() {
+
+		user = new User(
+			TestConstants.FAKEUSER_USERNAME_STRING,
+			TestConstants.FAKEUSER_EMAIL_STRING,
+			TestConstants.FAKEUSER_PASSWORD_STRING
+		);
+		userRepository.save(user);
+
+		resume = new UploadedResume(
+			TestConstants.RESUME_FILENAME,
+			TestConstants.RESUME_CONTENT_TYPE,
+			TestConstants.RESUME_CONTENT,
+			TestConstants.SOURCE_URL,
+			user
+		);
+		resumeRepository.save(resume);
+
+	}
 
 	@Test
 	void contextLoads() {
@@ -62,9 +97,7 @@ class ResumeAnalyzerApplicationTests {
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
 	void testSuccessfulGetUser_shouldReturnUserInfo() throws Exception{
-		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
-		userRepository.save(user);
-		RequestBuilder request = MockMvcRequestBuilders.get("/api/v1/users/"+ user.getId().toString());
+		RequestBuilder request = MockMvcRequestBuilders.get("/api/v1/users/{userId}",user.getId().toString());
 
 		mockMvc.perform(request)
 			.andExpect(status().is2xxSuccessful())
@@ -74,7 +107,7 @@ class ResumeAnalyzerApplicationTests {
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
 	void testUnSuccessfulGetUser_shouldReturnUserNotFoundError() throws Exception{
-		RequestBuilder request = MockMvcRequestBuilders.get("/api/v1/users/"+ TestConstants.FAKE_UUID_STRING);
+		RequestBuilder request = MockMvcRequestBuilders.get("/api/v1/users/{userId}", TestConstants.FAKE_UUID_STRING);
 
 		mockMvc.perform(request)
 			.andExpect(status().isNotFound())
@@ -84,11 +117,9 @@ class ResumeAnalyzerApplicationTests {
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
 	void testSuccessfulEditUser_shouldReturnEditedUserinfo() throws Exception{
-		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
-		userRepository.save(user);
-		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/"+ user.getId().toString())
+		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/{userId}",user.getId().toString())
 			.contentType(APPLICATION_JSON)
-			.content(TestConstants.EDITUSER_REQUEST);
+			.content(TestConstants.GOOD_EDITUSER_REQ);
 
 		mockMvc.perform(request)
 			.andExpect(status().is2xxSuccessful())
@@ -97,14 +128,12 @@ class ResumeAnalyzerApplicationTests {
 
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
-	void testUnSuccessfulEditUser_shouldReturnErrorIfInfoAlreadyInUse() throws Exception{
-		User user1 = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
-		User user2 = new User("slickfeet", "someemail@gmail.com", TestConstants.FAKEUSER_PASSWORD_STRING);
-		userRepository.save(user1);
+	void testUnSuccessfulEditUser__shouldReturnErrorIfInfoAlreadyInUse() throws Exception{
+		User user2 = new User("slicky", "someemail@gmail.com", TestConstants.FAKEUSER_PASSWORD_STRING);
 		userRepository.save(user2);
-		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/"+ user1.getId().toString())
+		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/{userId}",user.getId().toString())
 			.contentType(APPLICATION_JSON)
-			.content(TestConstants.EDITUSER_REQUEST);
+			.content(TestConstants.BAD_EDITUSER_REQ);
 
 		mockMvc.perform(request)
 			.andExpect(status().isBadRequest())
@@ -114,9 +143,7 @@ class ResumeAnalyzerApplicationTests {
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
 	void testSuccesfulDeleteUser_shouldDeleteUser() throws Exception{
-		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
-		userRepository.save(user);
-		RequestBuilder request = MockMvcRequestBuilders.delete("/api/v1/users/"+ user.getId().toString());
+		RequestBuilder request = MockMvcRequestBuilders.delete("/api/v1/users/{userId}",user.getId().toString());
 
 		mockMvc.perform(request)
 			.andExpect(status().is2xxSuccessful());
@@ -125,7 +152,7 @@ class ResumeAnalyzerApplicationTests {
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
 	void testUnSuccesfulDeleteUser_shouldThrowErrorIfUserNotFound() throws Exception{
-		RequestBuilder request = MockMvcRequestBuilders.delete("/api/v1/users/"+ TestConstants.FAKE_UUID_STRING);
+		RequestBuilder request = MockMvcRequestBuilders.delete("/api/v1/users/{userId}",TestConstants.FAKE_UUID_STRING);
 
 		mockMvc.perform(request)
 			.andExpect(status().isNotFound())
@@ -134,18 +161,59 @@ class ResumeAnalyzerApplicationTests {
 
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
-	void testUploadUserResume_shouldReturnResumeId() throws Exception{
-		User user = new User(TestConstants.FAKEUSER_USERNAME_STRING, TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.FAKEUSER_PASSWORD_STRING);
-		userRepository.save(user);
+	void testSuccessfulUploadUserResume_shouldReturnResumeId() throws Exception{
+		byte[] pdfBytes = Files.readAllBytes(
+			Paths.get("src\\test\\java\\com\\slickdev\\resume_analyzer\\resources\\Adelanwa_Oreofe_Emmanuel_CV_Styled.pdf")
+		);
 		MockMultipartFile pdfFile = new MockMultipartFile(
 			"file",              
 			"resume.pdf",
 			"application/pdf",
-			"Some PDF content".getBytes()
+			pdfBytes
 		);
 		RequestBuilder request = MockMvcRequestBuilders.multipart("/api/v1/users/{userId}/resumes",user.getId().toString())
 			.file(pdfFile)
     		.contentType(MediaType.MULTIPART_FORM_DATA);
+			
+		mockMvc.perform(request)
+			.andExpect(status().is2xxSuccessful())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testUnsuccessfulUploadUserResume_shouldReturnError() throws Exception{
+		MockMultipartFile pdfFile = new MockMultipartFile(
+			"file",              
+			"resume.pdf",
+			"application/pdf",
+			"Malformed PDF".getBytes()
+		);
+		RequestBuilder request = MockMvcRequestBuilders.multipart("/api/v1/users/{userId}/resumes",user.getId().toString())
+			.file(pdfFile)
+    		.contentType(MediaType.MULTIPART_FORM_DATA);
+			
+		mockMvc.perform(request)
+			.andExpect(status().isBadRequest())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testGetUserResumes_shouldReturnUserResumeList() throws Exception{
+		RequestBuilder request = MockMvcRequestBuilders.get("/api/v1/users/{userId}/resumes",user.getId().toString());
+			
+		mockMvc.perform(request)
+			.andExpect(status().is2xxSuccessful())
+			.andExpect(content().contentType(APPLICATION_JSON));
+	}
+
+	@Test
+	@WithMockUser(username = "testuser", roles = {"USER"})
+	void testAnalyzeResumes() throws Exception{
+		RequestBuilder request = MockMvcRequestBuilders.post("/api/v1/resumes/{resumeId}/analyze",resume.getId().toString())
+			.contentType(APPLICATION_JSON)
+			.content(TestConstants.JOB_DESCRIPTION_REQUEST);
 			
 		mockMvc.perform(request)
 			.andExpect(status().is2xxSuccessful())
