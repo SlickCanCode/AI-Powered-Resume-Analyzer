@@ -17,7 +17,6 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.sax.BodyContentHandler;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -150,7 +149,7 @@ public class ResumeServiceImpl implements ResumeService{
             boolean isPdf = fileType.equals("application/pdf");
             boolean isImage = fileType.startsWith("image/");
             if (!isPdf && !isImage) {
-                throw new IllegalArgumentException("Only PDF and image files are allowed");
+                throw new IllegalArgumentException("Only PDF and maybe image files are allowed");
             }
 
             // Extra Security for malformed pdfs 
