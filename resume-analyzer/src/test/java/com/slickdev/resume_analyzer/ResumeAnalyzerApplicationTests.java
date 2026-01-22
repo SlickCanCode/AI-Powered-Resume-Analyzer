@@ -16,11 +16,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+
 import com.slickdev.resume_analyzer.Constants.TestConstants;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +33,7 @@ import java.nio.file.Paths;
 
 @SpringBootTest
 @ActiveProfiles("dev")
+@Transactional
 @AutoConfigureMockMvc
 class ResumeAnalyzerApplicationTests {
 

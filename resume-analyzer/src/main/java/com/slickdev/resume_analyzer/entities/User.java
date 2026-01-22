@@ -38,7 +38,6 @@ public class User {
 
     @Id
     @GeneratedValue()
-    @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
     @NonNull
@@ -46,7 +45,7 @@ public class User {
     @SpecialCharactersValidation
     @UniqueUsername
     @UsernameLength
-    @Column(name = "userName")
+    @Column(name = "user_name")
     private String userName;
 
     @NonNull

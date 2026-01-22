@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,25 +19,25 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@Table(name = "uploaded_resumes")
 public class UploadedResume {
     
     @Id
     @GeneratedValue()
-    @Column(name = "id", columnDefinition = "BINARY(16)")
     private UUID id;
 
-    @Column(name = "File_name")
+    @Column(name = "file_name")
     private String filename;
 
-    @Column(name = "File_type")
+    @Column(name = "file_type")
     private String contentType;
 
-    @Column(name = "Source_url")
+    @Column(name = "source_url")
     private String source_url;
 
     @Lob
     @NotBlank(message = "Content should not be blank")
-    @Column(name = "File_Content")
+    @Column(name = "file_Content")
     private String content;    
 
     @Lob
