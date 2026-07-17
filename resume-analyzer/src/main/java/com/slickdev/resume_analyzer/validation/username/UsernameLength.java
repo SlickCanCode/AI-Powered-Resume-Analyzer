@@ -12,7 +12,7 @@ import jakarta.validation.Payload;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = UsernameLengthValidator.class)
 public @interface UsernameLength {
-    String message() default "Username cannot be less than 4 characters";
+    String message() default "Your name cannot be less than 2 characters";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

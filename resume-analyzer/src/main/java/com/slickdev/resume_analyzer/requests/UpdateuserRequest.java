@@ -11,8 +11,12 @@ import lombok.Setter;
 public class UpdateuserRequest {
 
     @NotBlank
-    private String userName;
+    private String firstName;
+
+    @NotBlank
+    private String lastName;
 
     @Email
+    @NotBlank
     private String email;
 }

@@ -10,9 +10,9 @@ import com.slickdev.resume_analyzer.entities.User;
 
 public interface ResumeRepository extends JpaRepository<UploadedResume, UUID>{
     
-    boolean existsByUserAndContent(User user, String content);
+    boolean existsByUser_EmailAndContent(String email, String content);
     boolean existsByContent(String content);
-    Optional<UploadedResume> findByUserAndContent(User user, String content);
+    Optional<UploadedResume> findByUser_EmailAndContent(String email, String content);
     Optional<UploadedResume> findByContent(String content);
     List<UploadedResume> findAllByUser(User user);
     

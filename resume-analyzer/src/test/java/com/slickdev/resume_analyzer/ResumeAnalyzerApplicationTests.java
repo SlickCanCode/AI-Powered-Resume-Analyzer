@@ -53,12 +53,13 @@ class ResumeAnalyzerApplicationTests {
 	void setup() {
 
 		user = new User(
-			TestConstants.FAKEUSER_USERNAME_STRING,
+			TestConstants.FAKEUSER_FIRSTNAME_STRING,
+			TestConstants.FAKEUSER_LASTNAME_STRING,
 			TestConstants.FAKEUSER_EMAIL_STRING,
 			TestConstants.FAKEUSER_PASSWORD_STRING
 		);
 		userRepository.save(user);
-
+		
 		resume = new UploadedResume(
 			TestConstants.RESUME_FILENAME,
 			TestConstants.RESUME_CONTENT_TYPE,
@@ -133,7 +134,7 @@ class ResumeAnalyzerApplicationTests {
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
 	void testUnSuccessfulEditUser__shouldReturnErrorIfInfoAlreadyInUse() throws Exception{
-		User user2 = new User("slicky", "someemail@gmail.com", TestConstants.FAKEUSER_PASSWORD_STRING);
+		User user2 = new User("john","doe", "someemail@gmail.com", TestConstants.FAKEUSER_PASSWORD_STRING);
 		userRepository.save(user2);
 		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/{userId}",user.getId().toString())
 			.contentType(APPLICATION_JSON)

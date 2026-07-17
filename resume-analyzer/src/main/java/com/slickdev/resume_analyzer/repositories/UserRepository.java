@@ -10,8 +10,6 @@ import com.slickdev.resume_analyzer.entities.User;
 
 public interface UserRepository extends JpaRepository<User, UUID> {
     
-    boolean existsByUserName(String userName);
     boolean existsByEmail(String email);
-    Optional<User> findByUserNameOrEmail (String userName, String email);
-    
+    Optional<User> findByEmail(String email);
 }

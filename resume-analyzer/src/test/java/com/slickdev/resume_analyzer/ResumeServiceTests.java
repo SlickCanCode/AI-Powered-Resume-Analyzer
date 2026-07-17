@@ -94,9 +94,10 @@ void setup() {
     fakeID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
 
     user = new User(
-        TestConstants.FAKEUSER_USERNAME_STRING,
-        TestConstants.FAKEUSER_EMAIL_STRING,
-        TestConstants.FAKEUSER_PASSWORD_STRING
+        	TestConstants.FAKEUSER_FIRSTNAME_STRING,
+			TestConstants.FAKEUSER_LASTNAME_STRING,
+			TestConstants.FAKEUSER_EMAIL_STRING,
+			TestConstants.FAKEUSER_PASSWORD_STRING
     );
     user.setId(fakeID);
 
@@ -166,9 +167,9 @@ void setup() {
 
     @Test
     public void findByContentAndUser_ShouldReturnResumeFromUserAndContent() {
-        when(repository.findByUserAndContent(any(User.class), anyString())).thenReturn(Optional.of(resume));
+        when(repository.findByUser_EmailAndContent(any(String.class), anyString())).thenReturn(Optional.of(resume));
 
-        UploadedResume foundResume = resumeService.findResumeByContentAndUser(user, TestConstants.RESUME_CONTENT);
+        UploadedResume foundResume = resumeService.findResumeByContentAndUseremail(TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.RESUME_CONTENT);
 
         assertNotNull(foundResume);
         assertEquals(foundResume.getFilename(), resume.getFilename());
@@ -177,17 +178,17 @@ void setup() {
 
     @Test
     public void findByContentAndUser_ShouldThrowExceptionWhenNotFound() {
-        when(repository.findByUserAndContent(any(User.class), anyString())).thenReturn(Optional.empty());
+        when(repository.findByUser_EmailAndContent(any(String.class), anyString())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () ->
-        resumeService.findResumeByContentAndUser(user, TestConstants.RESUME_CONTENT));
+        resumeService.findResumeByContentAndUseremail(TestConstants.FAKEUSER_EMAIL_STRING, TestConstants.RESUME_CONTENT));
     }
 
     @Test
     public void parseFile_ShouldSaveResumeAndReturnIdAsResponse_ForAuthenticatedUsers_AndUnexistingResume() {
-        when(repository.existsByUserAndContent(any(User.class), anyString())).thenReturn(false);
+        when(repository.existsByUser_EmailAndContent(any(String.class), anyString())).thenReturn(false);
         when(repository.save(any(UploadedResume.class))).thenReturn(resume);
-        when(repository.findByUserAndContent(any(User.class), anyString())).thenReturn(Optional.of(resume));
+        when(repository.findByUser_EmailAndContent(any(String.class), anyString())).thenReturn(Optional.of(resume));
         when(userService.getUser(anyString())).thenReturn(user);
         when(cloudinaryService.uploadResume(any(MultipartFile.class),anyString(),anyString())).thenReturn("source_url");
 
@@ -200,8 +201,8 @@ void setup() {
 
     @Test
     public void parseFile_ShouldSaveResumeAndReturnIdAsResponse_ForAuthenticatedUsers_AndExistingResume() {
-        when(repository.existsByUserAndContent(any(User.class), anyString())).thenReturn(true);
-        when(repository.findByUserAndContent(any(User.class), anyString())).thenReturn(Optional.of(resume));
+        when(repository.existsByUser_EmailAndContent(any(String.class), anyString())).thenReturn(true);
+        when(repository.findByUser_EmailAndContent(any(String.class), anyString())).thenReturn(Optional.of(resume));
         when(userService.getUser(anyString())).thenReturn(user);
                 when(cloudinaryService.uploadResume(any(MultipartFile.class),anyString(),anyString())).thenReturn("source_url");
 

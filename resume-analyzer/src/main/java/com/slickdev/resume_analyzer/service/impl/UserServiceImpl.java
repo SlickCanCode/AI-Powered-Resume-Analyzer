@@ -43,19 +43,26 @@ public class UserServiceImpl implements UserService{
         this.jwtService = jService;
     }
 
-
     @Override
     public AuthResponse registerUser(User user) {
         User savedUser = saveUser(user);
         String jwt = jwtService.generateToken(savedUser);
-        UserResponseDto userResponse= new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
+        UserResponseDto userResponse= new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
         return new AuthResponse(jwt, userResponse);
     }
 
     @Override
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        if (isEmailUnique(user.getEmail())) {
+            return userRepository.save(user);
+        } else {
+            throw new DuplicateResourceException("Email");
+        }
+    }
+
+    public boolean isEmailUnique(String email) {
+        return !userRepository.existsByEmail(email);
     }
 
     @Override
@@ -69,14 +76,13 @@ public class UserServiceImpl implements UserService{
     public UserResponseDto getUserinfo(String id) {
         UUID refinedId = UUID.fromString(formatUUID(id));
         User user = unwrapUser(userRepository.findById(refinedId), refinedId);
-        return new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
+        return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
     }
 
     @Override
-    public User getUserByUsernameOrEmail(String usernameOrEmail) {
-        Optional<User> user = userRepository.findByUserNameOrEmail(usernameOrEmail, usernameOrEmail);
-        if (user.isPresent()) return user.get();
-        else throw new EntityNotFoundException(usernameOrEmail, User.class);
+    public User getUserByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        return unwrapUser(user, null);
     }
 
     @Override
@@ -89,23 +95,17 @@ public class UserServiceImpl implements UserService{
     public UserResponseDto updateUser(String id, UpdateuserRequest request) {
         UUID refinedId = UUID.fromString(formatUUID(id));
         User user = unwrapUser(userRepository.findById(refinedId), refinedId);
-
+        
     if (!user.getEmail().equals(request.getEmail())) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Email");
         }
     }
-
-    // Username uniqueness check
-    if (!user.getUserName().equals(request.getUserName())) {
-        if (userRepository.existsByUserName(request.getUserName())) {
-            throw new DuplicateResourceException("Username");
-        }
-    }
-
+    
         user.setEmail(request.getEmail());
-        user.setUserName(request.getUserName());
-        return new UserResponseDto(user.getId(), user.getUserName(), user.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
     }
 
     static User unwrapUser(Optional<User> entity, UUID id) {

@@ -37,7 +37,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             throws AuthenticationException {
         try {
              LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
-             Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getUserNameOrEmail(), loginRequest.getPassword());
+             Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
             return authenticationManager.authenticate(authentication);
 
         }catch (IOException e) {
@@ -49,10 +49,10 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
 
-                User user = userService.getUserByUsernameOrEmail(authResult.getName());
+                User user = userService.getUserByEmail(authResult.getName());
 
         String token = jwtService.generateToken(user);
-                AuthResponse response2 = new AuthResponse(token, new UserResponseDto(user.getId(), user.getUserName(), user.getEmail()));
+                AuthResponse response2 = new AuthResponse(token, new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail()));
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json");

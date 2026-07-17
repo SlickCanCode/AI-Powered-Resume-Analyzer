@@ -11,8 +11,8 @@ public class TestConstants {
     public static final String FAKE_UUID_STRING = "123456781234123412341234567890ab";
     public static final String FAKE_WRONG_UUID_STRING = "543216781234123412341234567890ab";
     public static final String FAKEUSER_EMAIL_STRING = "johndoe@gmail.com";
-    public static final String FAKEUSER_FULLNAME_STRING = "John Doe";
-    public static final String FAKEUSER_USERNAME_STRING = "joey123";
+    public static final String FAKEUSER_FIRSTNAME_STRING = "joey";
+    public static final String FAKEUSER_LASTNAME_STRING = "sandals";
     public static final String FAKEUSER_PASSWORD_STRING = "somePassword123";
     public static final String FAKE_ENCODED_PASSWORD = "encodedPassword";
 

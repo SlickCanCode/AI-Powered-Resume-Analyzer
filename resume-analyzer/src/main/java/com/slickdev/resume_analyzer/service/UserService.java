@@ -13,7 +13,7 @@ public interface UserService {
     UserResponseDto getUserinfo(String id);
     UserResponseDto updateUser(String id, UpdateuserRequest  request);
     AuthResponse registerUser(User user);
-    User getUserByUsernameOrEmail(String usernameOrEmail);
+    User getUserByEmail(String email);
     void deleteUser(String id);
     
 }

@@ -10,6 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 
+
 @SpringBootApplication
 public class ResumeAnalyzerApplication {
 
@@ -29,7 +30,7 @@ public class ResumeAnalyzerApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-				.allowedOrigins("https://ai-powered-resume-analyzer-frontend.vercel.app/")
+				.allowedOrigins("http://localhost:3000", "https://ai-powered-resume-analyzer-frontend.vercel.app/")
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type");
 			}

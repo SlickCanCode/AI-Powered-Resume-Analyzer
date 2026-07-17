@@ -7,6 +7,6 @@ public class UsernameLengthValidator implements ConstraintValidator<UsernameLeng
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null || value.trim().isEmpty()) return true;
-        return value.length()>=4;
+        return value.trim().length() >= 2;
     }
 }

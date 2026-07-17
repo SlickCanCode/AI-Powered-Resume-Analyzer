@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.slickdev.resume_analyzer.validation.SpecialCharactersValidation;
 import com.slickdev.resume_analyzer.validation.email.UniqueEmail;
 import com.slickdev.resume_analyzer.validation.password.PasswordLength;
-import com.slickdev.resume_analyzer.validation.username.UniqueUsername;
 import com.slickdev.resume_analyzer.validation.username.UsernameLength;
 
 import jakarta.persistence.CascadeType;
@@ -21,17 +20,16 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 
 @NoArgsConstructor
 @Getter
 @Setter
-@RequiredArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
@@ -40,23 +38,27 @@ public class User {
     @GeneratedValue()
     private UUID id;
 
-    @NonNull
-    @NotBlank(message = "Username cannot be blank") 
+    @NotNull
+    @NotBlank(message = "First name cannot be blank")
     @SpecialCharactersValidation
-    @UniqueUsername
     @UsernameLength
-    @Column(name = "user_name")
-    private String userName;
+    @Column(name = "first_name")
+    private String firstName;
 
-    @NonNull
+    @NotNull
+    @NotBlank(message = "Last name cannot be blank")
+    @SpecialCharactersValidation
+    @UsernameLength
+    @Column(name = "last_name")
+    private String lastName;
+
+    @NotNull
     @NotBlank(message = "Email cannot be blank")
     @Email
-    @UniqueEmail
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
-
     
-    @NonNull
+    @NotNull
     @NotBlank(message = "Password cannot be blank")
     @PasswordLength
     @Column(name = "password")
@@ -66,4 +68,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UploadedResume> resumes;
 
+    public User (String firstname, String lastname, String email, String password) {
+        this.firstName = firstname;
+        this.lastName = lastname;
+        this.email = email;
+        this.password = password;
+    }
 }

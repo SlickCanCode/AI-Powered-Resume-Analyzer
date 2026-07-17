@@ -64,10 +64,10 @@ public class ResumeServiceImpl implements ResumeService{
     }
 
     @Override
-    public UploadedResume findResumeByContentAndUser(User user, String content) {
-        Optional<UploadedResume> resume = resumeRepository.findByUserAndContent(user, content);
+    public UploadedResume findResumeByContentAndUseremail(String email, String content) {
+        Optional<UploadedResume> resume = resumeRepository.findByUser_EmailAndContent(email, content);
         if (resume.isPresent()) return resume.get();
-        else throw new EntityNotFoundException(user.getUserName(), UploadedResume.class);
+        else throw new EntityNotFoundException(email, UploadedResume.class);
     }
 
     @Override
@@ -180,7 +180,7 @@ public class ResumeServiceImpl implements ResumeService{
             String secure_url = cloudinaryService.uploadResume(file, userId, fileType);
                 
                     User user = userService.getUser(userId);
-                    if (!resumeRepository.existsByUserAndContent(user, parsedContent)) {
+                    if (!resumeRepository.existsByUser_EmailAndContent(user.getEmail(), parsedContent)) {
                         UploadedResume resume = saveResume(new UploadedResume(fileName, fileType, parsedContent, secure_url, user));
                             if (user.getResumes()!=null ) { //avoid null pointer exception
                                 user.getResumes().add(resume);
@@ -189,7 +189,7 @@ public class ResumeServiceImpl implements ResumeService{
                             }
                             resumeRepository.save(resume);
                     }
-                    UploadedResume resume = findResumeByContentAndUser(user, parsedContent);
+                    UploadedResume resume = findResumeByContentAndUseremail(user.getEmail(), parsedContent);
                     return new ResumeIdResponse(resume.getId().toString());
 
             

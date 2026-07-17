@@ -12,6 +12,10 @@ public class UniqueEmailValidator implements ConstraintValidator<UniqueEmail, St
     @Autowired
     private UserRepository userRepository;
 
+    public UniqueEmailValidator(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null) return true;
