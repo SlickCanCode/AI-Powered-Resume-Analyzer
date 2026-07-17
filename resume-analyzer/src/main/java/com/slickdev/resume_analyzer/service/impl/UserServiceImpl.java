@@ -14,6 +14,7 @@ import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
+import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.UserService;
@@ -44,10 +45,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public AuthResponse registerUser(User user) {
-        User savedUser = saveUser(user);
+    public AuthResponse registerUser(RegisterRequest user) {
+        User savedUser = saveUser(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
         String jwt = jwtService.generateToken(savedUser);
-        UserResponseDto userResponse= new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+        UserResponseDto userResponse= new UserResponseDto(savedUser.getId(), savedUser.getFirstName(), savedUser.getLastName(), savedUser.getEmail());
         return new AuthResponse(jwt, userResponse);
     }
 

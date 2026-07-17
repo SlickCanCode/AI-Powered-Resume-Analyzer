@@ -7,7 +7,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.slickdev.resume_analyzer.validation.SpecialCharactersValidation;
-import com.slickdev.resume_analyzer.validation.email.UniqueEmail;
 import com.slickdev.resume_analyzer.validation.password.PasswordLength;
 import com.slickdev.resume_analyzer.validation.username.UsernameLength;
 
@@ -21,7 +20,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

@@ -4,6 +4,7 @@ package com.slickdev.resume_analyzer.service;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
+import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 
 public interface UserService {
@@ -12,7 +13,7 @@ public interface UserService {
     User getUser(String id);
     UserResponseDto getUserinfo(String id);
     UserResponseDto updateUser(String id, UpdateuserRequest  request);
-    AuthResponse registerUser(User user);
+    AuthResponse registerUser(RegisterRequest user);
     User getUserByEmail(String email);
     void deleteUser(String id);
     

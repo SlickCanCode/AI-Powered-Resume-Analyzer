@@ -64,10 +64,10 @@ public class TestConstants {
                 pdfBytes
         );
 
-    public static final String signinRequest = "{\"userName\":\"slickfeet\", \"email\":\"johndoe123@gmail.com\", \"password\":\"johndoe123\"}";
-    public static final String badSigninRequest = "{\"fullName\":\"joh\", \"userName\":\"sli\", \"email\":\"johndoe123\", \"password\":\"jo\"}";
+    public static final String signinRequest = "{\"firstName\":\"John\",\"lastName\":\"Doe\", \"email\":\"johndoe123@gmail.com\", \"password\":\"johndoe123\"}";
+    public static final String badSigninRequest = "{\"firstName\":\"John\",\"lastName\":\"Doe\", \"email\":\"johndoe123\", \"password\":\"johndoe123\"}";
     public static final UUID FAKE_UUID = UUID.fromString("12345678-1234-1234-1234-1234567890ab");
-    public static final String BAD_EDITUSER_REQ = "{\"userName\":\"slicky\", \"email\":\"johndoe12@gmail.com\"}";
-    public static final String GOOD_EDITUSER_REQ = "{\"userName\":\"Userame\", \"email\":\"johndoe1@gmail.com\"}";    
+    public static final String BAD_EDITUSER_REQ = "{\"firstName\":\"John\",\"lastName\":\"Doe\", \"email\":\"someemail@gmail.com\"}";
+    public static final String GOOD_EDITUSER_REQ = "{\"firstName\":\"John\",\"lastName\":\"Doe\", \"email\":\"johndoe1@gmail.com\"}";    
     public static final String JOB_DESCRIPTION_REQUEST = "{\"jobDescription\":\"juiorDev\"}";
 }

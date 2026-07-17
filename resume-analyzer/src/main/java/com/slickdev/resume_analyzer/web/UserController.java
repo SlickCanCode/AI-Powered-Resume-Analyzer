@@ -15,11 +15,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
+import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.UserService;
@@ -41,7 +41,7 @@ public class UserController {
     private final ResumeService resumeService;
 
     @PostMapping("")
-    public ResponseEntity<AuthResponse> saveUser(@Valid @RequestBody User user) {
+    public ResponseEntity<AuthResponse> saveUser(@Valid @RequestBody RegisterRequest user) {
         return new ResponseEntity<AuthResponse>(userService.registerUser(user), HttpStatus.CREATED);
     }
 

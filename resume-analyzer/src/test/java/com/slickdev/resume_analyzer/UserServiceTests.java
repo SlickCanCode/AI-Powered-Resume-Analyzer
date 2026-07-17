@@ -145,7 +145,6 @@ public class UserServiceTests {
     public void updateUser_shouldReturnUpdatedUserinfo() {
         when(repository.findById(any(UUID.class))).thenReturn(Optional.of(user));
         when(repository.existsByEmail(anyString())).thenReturn(false);
-        when(repository.save(any(User.class))).thenReturn(user);
 
         UpdateuserRequest request = new UpdateuserRequest();
         request.setEmail("someEmail@gmail.com");

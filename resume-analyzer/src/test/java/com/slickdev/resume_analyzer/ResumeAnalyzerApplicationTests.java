@@ -134,7 +134,7 @@ class ResumeAnalyzerApplicationTests {
 	@Test
 	@WithMockUser(username = "testuser", roles = {"USER"})
 	void testUnSuccessfulEditUser__shouldReturnErrorIfInfoAlreadyInUse() throws Exception{
-		User user2 = new User("john","doe", "someemail@gmail.com", TestConstants.FAKEUSER_PASSWORD_STRING);
+		User user2 = new User("John","Doe", "someemail@gmail.com", TestConstants.FAKEUSER_PASSWORD_STRING);
 		userRepository.save(user2);
 		RequestBuilder request = MockMvcRequestBuilders.put("/api/v1/users/{userId}",user.getId().toString())
 			.contentType(APPLICATION_JSON)
