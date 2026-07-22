@@ -44,10 +44,18 @@ public class UserServiceImpl implements UserService{
         this.jwtService = jService;
     }
 
+    OtpService otpService;
+    @Autowired
+    public void setOtpService(OtpService otpService) {
+        this.otpService = otpService;
+    }
+
     @Override
     public AuthResponse registerUser(RegisterRequest user) {
         User savedUser = saveUser(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
         String jwt = jwtService.generateToken(savedUser);
+        otpService.generateOTP(savedUser);
+        // otpService.sendOtp(otpService.generateOTP(savedUser), savedUser.getEmail());
         UserResponseDto userResponse= new UserResponseDto(savedUser.getId(), savedUser.getFirstName(), savedUser.getLastName(), savedUser.getEmail());
         return new AuthResponse(jwt, userResponse);
     }
