@@ -1,6 +1,7 @@
 package com.slickdev.resume_analyzer.entities;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ import com.slickdev.resume_analyzer.validation.username.UsernameLength;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -31,7 +33,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Builder
 @AllArgsConstructor
 @Table(name = "users")
 public class User {
@@ -68,16 +69,15 @@ public class User {
 
     @NotNull
     @Column(name = "email_verified", nullable = false)
-    @Builder.Default
     private boolean emailVerified = false;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<UploadedResume> resumes;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<UploadedResume> resumes = new ArrayList<>();
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<VerificationToken> tokens;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<VerificationToken> tokens = new ArrayList<>();
 
     public User (String firstname, String lastname, String email, String password) {
         this.firstName = firstname;

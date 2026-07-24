@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import com.drew.lang.annotations.NotNull;
 
-import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,6 +18,8 @@ import lombok.NoArgsConstructor;
 
 @Builder
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "verification_token")
 public class VerificationToken {
     
@@ -40,7 +41,7 @@ public class VerificationToken {
     private LocalDateTime expiresAt;
 
     @NotNull
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }
