@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
@@ -17,9 +18,9 @@ import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.JwtService;
+import com.slickdev.resume_analyzer.service.OtpService;
 import com.slickdev.resume_analyzer.service.UserService;
 
-import jakarta.transaction.Transactional;
 
 
 @Service
@@ -44,12 +45,18 @@ public class UserServiceImpl implements UserService{
         this.jwtService = jService;
     }
 
+    OtpService otpService;
+    @Autowired
+    public void setOtpService(OtpService otpService) {
+        this.otpService = otpService;
+    }
+
     @Override
     public AuthResponse registerUser(RegisterRequest user) {
         User savedUser = saveUser(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
         String jwt = jwtService.generateToken(savedUser);
-        UserResponseDto userResponse= new UserResponseDto(savedUser.getId(), savedUser.getFirstName(), savedUser.getLastName(), savedUser.getEmail());
-        return new AuthResponse(jwt, userResponse);
+        otpService.sendOtp(otpService.generateOtp(savedUser), savedUser.getEmail());
+        return new AuthResponse(jwt, savedUser.getEmail());
     }
 
     @Override
@@ -60,10 +67,6 @@ public class UserServiceImpl implements UserService{
         } else {
             throw new DuplicateResourceException("Email");
         }
-    }
-
-    public boolean isEmailUnique(String email) {
-        return !userRepository.existsByEmail(email);
     }
 
     @Override
@@ -82,8 +85,9 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User getUserByEmail(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
-        return unwrapUser(user, null);
+        Optional<User> entity = userRepository.findByEmail(email);
+        if (entity.isPresent()) return entity.get();
+        else throw new EntityNotFoundException(email, User.class);
     }
 
     @Override
@@ -112,6 +116,10 @@ public class UserServiceImpl implements UserService{
     static User unwrapUser(Optional<User> entity, UUID id) {
         if (entity.isPresent()) return entity.get();
         else throw new EntityNotFoundException(id, User.class);
+    }
+
+    public boolean isEmailUnique(String email) {
+        return !userRepository.existsByEmail(email);
     }
 
     private String formatUUID(String raw) {

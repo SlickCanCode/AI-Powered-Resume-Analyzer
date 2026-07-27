@@ -42,7 +42,8 @@ public class SecurityConfig {
         .cors(Customizer.withDefaults())
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/h2/**").permitAll()
+            .requestMatchers("/h2-console/**").permitAll()
+            .requestMatchers("/api/v1/auth/**").permitAll()
             .requestMatchers(HttpMethod.POST, SecurityConstants.REGISTER_PATH).permitAll()
             .anyRequest().authenticated()
         ).addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
