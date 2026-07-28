@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -60,6 +61,7 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
+    @Async
     public void sendOtp(String otp, String email) {
         Resend resend = new Resend(ServiceConstants.RESEND_API_KEY);
                 CreateEmailOptions params = CreateEmailOptions.builder()

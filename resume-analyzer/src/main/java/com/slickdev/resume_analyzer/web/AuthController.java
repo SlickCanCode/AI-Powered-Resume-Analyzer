@@ -3,6 +3,7 @@ package com.slickdev.resume_analyzer.web;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.slickdev.resume_analyzer.reponses.AuthResponse;
 import com.slickdev.resume_analyzer.requests.VerifyOtpRequest;
 import com.slickdev.resume_analyzer.service.AuthService;
 
@@ -29,8 +30,8 @@ public class AuthController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<?> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
-        return new ResponseEntity<>(authService.verifyOtp(request.getOtp(), request.getEmail()), HttpStatus.OK);
+    public ResponseEntity<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        return new ResponseEntity<AuthResponse>(authService.verifyOtp(request.getOtp(), request.getEmail()), HttpStatus.OK);
     }
     
 }

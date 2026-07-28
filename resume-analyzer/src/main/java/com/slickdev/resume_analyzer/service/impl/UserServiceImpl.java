@@ -13,6 +13,7 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.reponses.AuthResponse;
+import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
@@ -52,11 +53,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public AuthResponse registerUser(RegisterRequest user) {
+    public RegisterResponse registerUser(RegisterRequest user) {
         User savedUser = saveUser(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
-        String jwt = jwtService.generateToken(savedUser);
         otpService.sendOtp(otpService.generateOtp(savedUser), savedUser.getEmail());
-        return new AuthResponse(jwt, savedUser.getEmail());
+        return new RegisterResponse(savedUser.getEmail());
     }
 
     @Override

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.slickdev.resume_analyzer.reponses.AuthResponse;
+import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
@@ -41,8 +41,8 @@ public class UserController {
     private final ResumeService resumeService;
 
     @PostMapping("")
-    public ResponseEntity<AuthResponse> saveUser(@Valid @RequestBody RegisterRequest user) {
-        return new ResponseEntity<AuthResponse>(userService.registerUser(user), HttpStatus.CREATED);
+    public ResponseEntity<RegisterResponse> saveUser(@Valid @RequestBody RegisterRequest user) {
+        return new ResponseEntity<RegisterResponse>(userService.registerUser(user), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
