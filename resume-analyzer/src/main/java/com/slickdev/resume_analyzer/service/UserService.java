@@ -16,5 +16,6 @@ public interface UserService {
     RegisterResponse registerUser(RegisterRequest user);
     User getUserByEmail(String email);
     void deleteUser(String id);
+    boolean isEmailUnique(String email);
     
 }

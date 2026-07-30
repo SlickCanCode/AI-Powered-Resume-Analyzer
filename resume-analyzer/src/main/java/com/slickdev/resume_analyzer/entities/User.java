@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.slickdev.resume_analyzer.validation.SpecialCharactersValidation;
-import com.slickdev.resume_analyzer.validation.password.PasswordLength;
 import com.slickdev.resume_analyzer.validation.username.UsernameLength;
 
 import jakarta.persistence.CascadeType;
@@ -60,10 +59,8 @@ public class User {
     @Column(name = "email", unique = true)
     private String email;
     
-    @NotNull
-    @NotBlank(message = "Password cannot be blank")
-    @PasswordLength
-    @Column(name = "password")
+
+    @Column(name = "password", nullable = true)
     private String password;
 
     @NotNull
@@ -83,6 +80,13 @@ public class User {
         this.lastName = lastname;
         this.email = email;
         this.password = password;
+    }
+
+    public User(String firstname, String lastname, String email, boolean emailVerified) {
+        this.firstName = firstname;
+        this.lastName = lastname;
+        this.email = email;
+        this.emailVerified = emailVerified;
     }
 
     public void addToken(VerificationToken token) {

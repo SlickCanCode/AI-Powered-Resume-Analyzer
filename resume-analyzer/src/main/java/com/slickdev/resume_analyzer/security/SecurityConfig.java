@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -27,6 +28,7 @@ import lombok.AllArgsConstructor;
     
 @Configuration
 @AllArgsConstructor
+@EnableWebSecurity
 public class SecurityConfig {
 
     private CustomAuthenticationManager authentication;
@@ -46,11 +48,16 @@ public class SecurityConfig {
             .requestMatchers("/api/v1/auth/**").permitAll()
             .requestMatchers(HttpMethod.POST, SecurityConstants.REGISTER_PATH).permitAll()
             .anyRequest().authenticated()
-        ).addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
+        )
+        .oauth2Login(oauth -> oauth
+        .defaultSuccessUrl("/api/v1/auth/oauth2/success", true))
+        .addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
         .addFilter(authenticationFilter)
         .addFilterAfter(new JWTAuthorizationFilter(), AuthenticationFilter.class)
         .headers(headers -> headers.frameOptions(frameOption -> frameOption.sameOrigin()))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+        );
 
     return http.build();
        
@@ -70,6 +77,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
     
 }
 

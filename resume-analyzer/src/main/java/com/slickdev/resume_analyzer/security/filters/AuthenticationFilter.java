@@ -11,7 +11,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.ApiError;
-import com.slickdev.resume_analyzer.reponses.AuthResponse;
+import com.slickdev.resume_analyzer.reponses.jwtResponse;
 import com.slickdev.resume_analyzer.requests.LoginRequest;
 import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
 import com.slickdev.resume_analyzer.service.JwtService;
@@ -51,7 +51,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 User user = userService.getUserByEmail(authResult.getName());
 
         String token = jwtService.generateToken(user);
-                AuthResponse response2 = new AuthResponse(token, user.getEmail());
+                jwtResponse response2 = new jwtResponse(token);
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json");

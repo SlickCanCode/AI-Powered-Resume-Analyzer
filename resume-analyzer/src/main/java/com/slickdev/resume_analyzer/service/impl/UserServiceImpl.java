@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
-import com.slickdev.resume_analyzer.reponses.AuthResponse;
+import com.slickdev.resume_analyzer.reponses.jwtResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
@@ -118,6 +118,7 @@ public class UserServiceImpl implements UserService{
         else throw new EntityNotFoundException(id, User.class);
     }
 
+    @Override
     public boolean isEmailUnique(String email) {
         return !userRepository.existsByEmail(email);
     }

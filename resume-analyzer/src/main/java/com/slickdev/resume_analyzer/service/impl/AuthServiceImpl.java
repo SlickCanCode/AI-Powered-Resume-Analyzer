@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.slickdev.resume_analyzer.entities.User;
-import com.slickdev.resume_analyzer.reponses.AuthResponse;
+import com.slickdev.resume_analyzer.reponses.jwtResponse;
 import com.slickdev.resume_analyzer.service.AuthService;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OtpService;
@@ -39,10 +39,10 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse verifyOtp(String otp, String email) {
+    public jwtResponse verifyOtp(String otp, String email) {
         User user = userService.getUserByEmail(email);
         otpService.verifyOtp(otp, user);
         String jwt = jwtService.generateToken(user);
-        return new AuthResponse(jwt, user.getEmail());
+        return new jwtResponse(jwt);
     }
 }
