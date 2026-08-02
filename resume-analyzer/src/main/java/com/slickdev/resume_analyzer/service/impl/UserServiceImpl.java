@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
-import com.slickdev.resume_analyzer.reponses.jwtResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
@@ -61,13 +60,19 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public User saveUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getPassword()!= null) {
+         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         if (isEmailUnique(user.getEmail())) {
             return userRepository.save(user);
+        }
+        User existingUser = getUserByEmail(user.getEmail());
+         if (!existingUser.isEmailVerified()) {
+            return existingUser;
         } else {
             throw new DuplicateResourceException("Email");
         }
-    }
+    } 
 
     @Override
     public User getUser(String id) {

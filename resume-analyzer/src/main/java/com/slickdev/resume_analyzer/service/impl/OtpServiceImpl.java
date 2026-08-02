@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -61,7 +60,6 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
-    @Async
     public void sendOtp(String otp, String email) {
         Resend resend = new Resend(ServiceConstants.RESEND_API_KEY);
                 CreateEmailOptions params = CreateEmailOptions.builder()
@@ -104,7 +102,7 @@ public class OtpServiceImpl implements OtpService {
 
     public void sendIsValid(List<VerificationToken> userTokens, VerificationToken lastToken) {
         if (lastToken.getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(1))) {
-            throw new RateLimitException("wait for 1 minute cooldown before resend");
+            throw new RateLimitException("wait for 1 minute cooldown before otp resend");
         } else if (userTokens.size() == 5 && 
             userTokens.get(0).getCreatedAt().isAfter(LocalDateTime.now().minusMinutes(60))) {
             throw new RateLimitException("Too much otp sent, please try again in 1 hour");

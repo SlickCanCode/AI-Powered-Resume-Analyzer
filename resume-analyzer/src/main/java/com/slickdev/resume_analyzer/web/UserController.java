@@ -40,6 +40,8 @@ public class UserController {
     private final UserService userService;
     private final ResumeService resumeService;
 
+    // implement redirecting to veriy otp page if the user is not verified and trying to register -
+    // with unverified email. 
     @PostMapping("")
     public ResponseEntity<RegisterResponse> saveUser(@Valid @RequestBody RegisterRequest user) {
         return new ResponseEntity<RegisterResponse>(userService.registerUser(user), HttpStatus.CREATED);

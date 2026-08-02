@@ -55,11 +55,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         .secure(true) // true in production
         .path("/")
         .maxAge(Duration.ofDays(1))
-        .sameSite("Lax")
+        .sameSite("None") // or "Lax" if frontend is on the same domain 
         .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        response.sendRedirect("http://localhost:5173");
-
+        response.sendRedirect("http://localhost:3000/dashboard");
 }
 }

@@ -1,7 +1,10 @@
 package com.slickdev.resume_analyzer.security.filters;
 
 import java.io.IOException;
+import java.time.Duration;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -51,12 +54,22 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 User user = userService.getUserByEmail(authResult.getName());
 
         String token = jwtService.generateToken(user);
-                jwtResponse response2 = new jwtResponse(token);
+        ResponseCookie cookie = ResponseCookie.from("access_token", token)
+            .httpOnly(true)
+            .secure(true)      // false only for local HTTP development
+            .path("/")
+            .sameSite("None")   // or "Lax" if frontend is on the same domain
+            .maxAge(Duration.ofDays(1))
+            .build();
 
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.setContentType("application/json");
-            new ObjectMapper().writeValue(response.getWriter(), response2);
-    }
+    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    response.setStatus(HttpServletResponse.SC_OK);
+
+    // Cookie uses SameSite=None; 
+    // Secure if frontend and backend are on different sites in production. 
+    // For local HTTP development, you may need secure(false) with SameSite=Lax depending on your setup.
+}
+
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,

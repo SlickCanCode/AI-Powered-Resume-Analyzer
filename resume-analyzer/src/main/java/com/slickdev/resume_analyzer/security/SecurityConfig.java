@@ -18,6 +18,7 @@ import com.slickdev.resume_analyzer.security.filters.AuthenticationFilter;
 import com.slickdev.resume_analyzer.security.filters.ExceptionHandlerFilter;
 import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
 import com.slickdev.resume_analyzer.service.JwtService;
+import com.slickdev.resume_analyzer.service.OAuth2SuccessHandler;
 import com.slickdev.resume_analyzer.service.UserService;
 import com.slickdev.resume_analyzer.security.filters.JWTAuthorizationFilter;
 
@@ -34,6 +35,7 @@ public class SecurityConfig {
     private CustomAuthenticationManager authentication;
     private final UserService  userService;
     private final JwtService  jwtService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -49,8 +51,7 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, SecurityConstants.REGISTER_PATH).permitAll()
             .anyRequest().authenticated()
         )
-        .oauth2Login(oauth -> oauth
-        .defaultSuccessUrl("/api/v1/auth/oauth2/success", true))
+        .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler))
         .addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
         .addFilter(authenticationFilter)
         .addFilterAfter(new JWTAuthorizationFilter(), AuthenticationFilter.class)
