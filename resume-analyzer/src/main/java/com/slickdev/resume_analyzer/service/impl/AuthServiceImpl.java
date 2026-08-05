@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.jwtResponse;
+import com.slickdev.resume_analyzer.reponses.VerifyOtpResponse;
 import com.slickdev.resume_analyzer.service.AuthService;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OtpService;
@@ -45,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void verifyOtp(String otp, String email, HttpServletResponse response) {
+    public VerifyOtpResponse verifyOtp(String otp, String email, HttpServletResponse response, String purpose) {
         User user = userService.getUserByEmail(email);
         otpService.verifyOtp(otp, user);
         String jwt = jwtService.generateToken(user);
@@ -58,5 +59,17 @@ public class AuthServiceImpl implements AuthService {
             .build();
 
     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    String resetToken = "No reset Token needed";
+        if (purpose.equals("reset-password")) {
+            resetToken = jwtService.generateResetToken(user);
+        }
+        return new VerifyOtpResponse(resetToken);
+    }
+
+    @Override
+    public void resetPassword(String jwt, String newPassword, String resetToken) {
+        if (!jwtService.extractUserId(resetToken).equals(jwtService.extractUserId(jwt))) throw new IllegalArgumentException("Invalid token");
+        if (!jwtService.isValid(resetToken)) throw new IllegalArgumentException("Expired reset token");
+        userService.resetPassword(resetToken, newPassword);
     }
 }

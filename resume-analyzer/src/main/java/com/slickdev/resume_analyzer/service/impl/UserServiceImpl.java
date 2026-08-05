@@ -118,6 +118,17 @@ public class UserServiceImpl implements UserService{
         return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
     }
 
+    @Override
+    public void resetPassword(String jwt, String newPassword) {
+        String id = jwtService.extractUserId(jwt);
+        User user = getUser(id);
+        if (!passwordEncoder.matches(newPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+        } else {
+            throw new IllegalArgumentException("New password cannot be the same as the old password.");
+        }
+    }
+
     static User unwrapUser(Optional<User> entity, UUID id) {
         if (entity.isPresent()) return entity.get();
         else throw new EntityNotFoundException(id, User.class);

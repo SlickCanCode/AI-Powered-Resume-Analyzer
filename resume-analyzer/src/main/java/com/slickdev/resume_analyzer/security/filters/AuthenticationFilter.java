@@ -39,7 +39,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             throws AuthenticationException {
         try {
              LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
-             Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
+             Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
             return authenticationManager.authenticate(authentication);
 
         }catch (IOException e) {

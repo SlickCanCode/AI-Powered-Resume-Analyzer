@@ -4,9 +4,9 @@ import java.util.UUID;
 
 public class EntityNotFoundException extends RuntimeException{
     public EntityNotFoundException(UUID id, Class<?> entity) {
-        super("The " + entity.getSimpleName().toLowerCase() + " with id '" + id + "' does not exist in our records");
+        super("This user does not exist in our records");
 }
     public EntityNotFoundException(String Email, Class<?> entity) {
-                super("The " + entity.getSimpleName().toLowerCase() + " with '" + Email + "' does not exist in our records");
+                super("This email does not exist in our records");
     }
 }

@@ -14,6 +14,7 @@ public interface UserService {
     UserResponseDto getUserinfo(String id);
     UserResponseDto updateUser(String id, UpdateuserRequest  request);
     RegisterResponse registerUser(RegisterRequest user);
+    void resetPassword(String jwt, String newPassword);
     User getUserByEmail(String email);
     void deleteUser(String id);
     boolean isEmailUnique(String email);
