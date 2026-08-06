@@ -33,4 +33,6 @@ public class ResumeController {
         return new ResponseEntity<>(resumeService.analyzeResume(id, jobDescription) ,HttpStatus.OK);
     }
 
+    
+
 }

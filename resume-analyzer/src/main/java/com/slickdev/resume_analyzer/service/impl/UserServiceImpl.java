@@ -13,6 +13,7 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
+import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
@@ -127,6 +128,12 @@ public class UserServiceImpl implements UserService{
         } else {
             throw new IllegalArgumentException("New password cannot be the same as the old password.");
         }
+    }
+
+    @Override
+    public StatsResponse getStats(String userId) {
+        User user = getUser(userId);
+        
     }
 
     static User unwrapUser(Optional<User> entity, UUID id) {

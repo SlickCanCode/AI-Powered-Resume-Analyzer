@@ -2,10 +2,11 @@ CREATE TABLE uploaded_resumes (
     id UUID PRIMARY KEY,
     file_name VARCHAR(255),
     file_type VARCHAR(255),
+    analysis TEXT,
     source_url TEXT,
     file_content TEXT NOT NULL,
-    analysis TEXT,
-    user_id UUID,
+    user_id UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_uploaded_resumes_user
         FOREIGN KEY (user_id)

@@ -8,7 +8,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import com.slickdev.resume_analyzer.entities.User;
-import com.slickdev.resume_analyzer.reponses.jwtResponse;
 import com.slickdev.resume_analyzer.reponses.VerifyOtpResponse;
 import com.slickdev.resume_analyzer.service.AuthService;
 import com.slickdev.resume_analyzer.service.JwtService;

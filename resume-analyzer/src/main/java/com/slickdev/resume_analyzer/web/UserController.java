@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
+import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
@@ -72,5 +73,11 @@ public class UserController {
     public ResponseEntity<List<ResumeResponse>> getAllresumes(@PathVariable String id) {
         return new ResponseEntity<>(resumeService.getUserResumes(id), HttpStatus.OK);
     }
+
+    @GetMapping("/{id}/dashboard/stats")
+    public ResponseEntity<StatsResponse> getStats(@PathVariable String id) {
+        return new ResponseEntity<>(userService.getStats(id), HttpStatus.OK);
+    }
+    
 
 }
