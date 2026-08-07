@@ -15,5 +15,5 @@ public interface ResumeRepository extends JpaRepository<UploadedResume, UUID>{
     Optional<UploadedResume> findByUser_EmailAndContent(String email, String content);
     Optional<UploadedResume> findByContent(String content);
     List<UploadedResume> findAllByUser(User user);
-    
+    List<UploadedResume> findByUserAndAnalysisCountGreaterThan(User user, int count);    
 }

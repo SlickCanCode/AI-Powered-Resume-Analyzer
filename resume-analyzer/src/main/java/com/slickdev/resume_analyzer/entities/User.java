@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.slickdev.resume_analyzer.validation.SpecialCharactersValidation;
 import com.slickdev.resume_analyzer.validation.username.UsernameLength;
@@ -17,6 +16,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -73,7 +73,17 @@ public class User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<VerificationToken> tokens = new ArrayList<>();
+    private List<VerificationToken> tokens = new ArrayList<>(); 
+
+    @OneToOne(mappedBy = "user")
+    private Subscription subscription;
+
+    @OneToOne(mappedBy = "user")
+    private SubscriptionUsage subscriptionUsage;
+
+
+
+
 
     public User (String firstname, String lastname, String email, String password) {
         this.firstName = firstname;

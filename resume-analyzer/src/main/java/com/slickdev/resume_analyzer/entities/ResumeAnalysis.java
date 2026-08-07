@@ -1,5 +1,6 @@
 package com.slickdev.resume_analyzer.entities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,4 +53,9 @@ public class ResumeAnalysis {
     @ManyToOne
     @JoinColumn(name = "resume_id", referencedColumnName = "id")
     private UploadedResume resume;
+
+    @NotNull
+    @Column(name = "created_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }

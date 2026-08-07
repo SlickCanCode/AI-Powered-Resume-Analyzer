@@ -1,6 +1,7 @@
 package com.slickdev.resume_analyzer.service.impl;
 
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
@@ -50,6 +52,12 @@ public class UserServiceImpl implements UserService{
     @Autowired
     public void setOtpService(OtpService otpService) {
         this.otpService = otpService;
+    }
+
+    DashboardService dashboardService;
+    @Autowired
+    public void setDashboardService(DashboardService dashboardService) {
+        this.dashboardService = dashboardService;
     }
 
     @Override
@@ -133,8 +141,15 @@ public class UserServiceImpl implements UserService{
     @Override
     public StatsResponse getStats(String userId) {
         User user = getUser(userId);
-        
+        return dashboardService.getStats(user);
     }
+
+    @Override
+    public List<AnalysisPreviewResponse> getRecentAnalyses(String userId) {
+        User user = getUser(userId);
+        return dashboardService.getRecentAnalyses(user);
+    }
+
 
     static User unwrapUser(Optional<User> entity, UUID id) {
         if (entity.isPresent()) return entity.get();

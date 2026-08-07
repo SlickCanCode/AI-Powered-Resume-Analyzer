@@ -1,8 +1,10 @@
 package com.slickdev.resume_analyzer.entities;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.drew.lang.annotations.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -17,6 +19,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +28,8 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "uploaded_resumes")
 public class UploadedResume {
@@ -46,9 +52,9 @@ public class UploadedResume {
     @Column(name = "file_Content")
     private String content;    
 
-    @Lob
-    @Column(name = "analysis")
-    private String analysis;
+    @NotNull
+    @Column(name = "analysis_count")
+    private int analysisCount;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -56,7 +62,12 @@ public class UploadedResume {
 
     @JsonIgnore
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ResumeAnalysis> ranalysis;
+    private List<ResumeAnalysis> analysis;
+
+    @NotNull
+    @Column(name = "created_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     
     public UploadedResume (String fileName, String contentType, String content, String source_url, User user ) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
@@ -77,6 +78,11 @@ public class UserController {
     @GetMapping("/{id}/dashboard/stats")
     public ResponseEntity<StatsResponse> getStats(@PathVariable String id) {
         return new ResponseEntity<>(userService.getStats(id), HttpStatus.OK);
+    }
+    
+    @GetMapping("/{id}/dashboard/recent-analyses")
+    public ResponseEntity<List<AnalysisPreviewResponse>> getRecentAnalyses(@PathVariable String id) {
+        return new ResponseEntity<>(userService.getRecentAnalyses(id), HttpStatus.OK);
     }
     
 

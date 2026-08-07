@@ -83,6 +83,11 @@ public class ResumeServiceImpl implements ResumeService{
         return unwrapResume(resumeRepository.findById(refinedId), refinedId);
     }
 
+    @Override
+    public List<UploadedResume> getAnalyzedResumes(User user) {
+        return resumeRepository.findByUserAndAnalysisCountGreaterThan(user, 0);
+    }
+
     static UploadedResume unwrapResume(Optional<UploadedResume> entity, UUID id) {
         if (entity.isPresent()) return entity.get();
         else throw new EntityNotFoundException(id, UploadedResume.class);

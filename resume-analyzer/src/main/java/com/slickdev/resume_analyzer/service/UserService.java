@@ -1,7 +1,10 @@
 package com.slickdev.resume_analyzer.service;
 
 
+import java.util.List;
+
 import com.slickdev.resume_analyzer.entities.User;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
@@ -20,5 +23,5 @@ public interface UserService {
     void deleteUser(String id);
     boolean isEmailUnique(String email);
     StatsResponse getStats(String id);
-    
+    List<AnalysisPreviewResponse> getRecentAnalyses(String id);
 }
