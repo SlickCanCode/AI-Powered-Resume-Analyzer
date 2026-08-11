@@ -13,11 +13,13 @@ import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.StatsResponse;
+import com.slickdev.resume_analyzer.service.DashboardService;
+import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
 
 @Service
-public class DashboardService {
+public class DashboardServiceimpl implements DashboardService {
     
     ResumeService resumeService;
     @Autowired
@@ -31,10 +33,16 @@ public class DashboardService {
                 this.subscriptionService = subscriptionService;
         }
 
-        
-   public StatsResponse getStats(User user) {
+     JwtService jwtService;
+    @Autowired
+        public void setJwtService (JwtService jwtService) {
+                this.jwtService = jwtService;
+        }
 
-        List<UploadedResume> analyzedResumes = resumeService.getAnalyzedResumes(user);
+        
+   public StatsResponse getStats(String jwt) {
+        String userId = jwtService.extractUserId(jwt);
+        List<UploadedResume> analyzedResumes = resumeService.getAnalyzedResumes(userId);
 
         LocalDateTime startOfThisWeek = LocalDate.now()
         .with(DayOfWeek.MONDAY)
@@ -92,7 +100,7 @@ public class DashboardService {
 
         double atsScoreImprovement = thisWeekAtsAvg - lastWeekAtsAvg;
 
-        int analysesAvailable = subscriptionService.getAnalysesAllowed(user);
+        int analysesAvailable = subscriptionService.getAnalysesAllowed(userId);
         return new StatsResponse(
             totalAnalyzedResumes,
             totalAnalyzedResumesThisWeek,
@@ -104,8 +112,9 @@ public class DashboardService {
         );
 }
 
-    public List<AnalysisPreviewResponse> getRecentAnalyses(User user) {
-        List<UploadedResume> analyzedResumes = resumeService.getAnalyzedResumes(user);
+    public List<AnalysisPreviewResponse> getRecentAnalyses(String jwt) {
+        String userId = jwtService.extractUserId(jwt);
+        List<UploadedResume> analyzedResumes = resumeService.getAnalyzedResumes(userId);
         
                 return analyzedResumes.stream()
                         .filter(resume -> resume.getAnalysis() != null && !resume.getAnalysis().isEmpty())

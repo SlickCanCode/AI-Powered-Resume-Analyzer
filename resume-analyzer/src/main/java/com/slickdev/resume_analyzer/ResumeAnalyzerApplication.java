@@ -13,7 +13,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
 @SpringBootApplication
-@EnableAsync
 public class ResumeAnalyzerApplication {
 
 	public static void main(String[] args) {

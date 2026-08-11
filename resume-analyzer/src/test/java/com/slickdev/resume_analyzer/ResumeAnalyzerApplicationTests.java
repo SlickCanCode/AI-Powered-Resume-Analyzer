@@ -60,14 +60,14 @@ class ResumeAnalyzerApplicationTests {
 		);
 		userRepository.save(user);
 		
-		resume = new UploadedResume(
-			TestConstants.RESUME_FILENAME,
-			TestConstants.RESUME_CONTENT_TYPE,
-			TestConstants.RESUME_CONTENT,
-			TestConstants.SOURCE_URL,
-			user
-		);
-		resumeRepository.save(resume);
+		// resume = new UploadedResume(
+		// 	TestConstants.RESUME_FILENAME,
+		// 	TestConstants.RESUME_CONTENT_TYPE,
+		// 	TestConstants.RESUME_CONTENT,
+		// 	TestConstants.SOURCE_URL,
+		// 	user
+		// );
+		// resumeRepository.save(resume);
 
 	}
 

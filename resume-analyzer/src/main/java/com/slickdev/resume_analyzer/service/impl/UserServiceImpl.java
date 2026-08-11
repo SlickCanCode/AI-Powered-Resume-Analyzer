@@ -54,11 +54,6 @@ public class UserServiceImpl implements UserService{
         this.otpService = otpService;
     }
 
-    DashboardService dashboardService;
-    @Autowired
-    public void setDashboardService(DashboardService dashboardService) {
-        this.dashboardService = dashboardService;
-    }
 
     @Override
     public RegisterResponse registerUser(RegisterRequest user) {
@@ -91,8 +86,9 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserResponseDto getUserinfo(String id) {
-        UUID refinedId = UUID.fromString(formatUUID(id));
+    public UserResponseDto getUserinfo(String jwt) {
+        String userId = jwtService.extractUserId(jwt);
+        UUID refinedId = UUID.fromString(formatUUID(userId));
         User user = unwrapUser(userRepository.findById(refinedId), refinedId);
         return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
     }
@@ -105,14 +101,16 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void deleteUser(String id) {
-         getUser(id);
-        userRepository.deleteById(UUID.fromString(formatUUID(id)));
+    public void deleteUser(String jwt) {
+        String userId = jwtService.extractUserId(jwt);
+        getUser(userId);
+        userRepository.deleteById(UUID.fromString(formatUUID(userId)));
     }
 
     @Override
-    public UserResponseDto updateUser(String id, UpdateuserRequest request) {
-        UUID refinedId = UUID.fromString(formatUUID(id));
+    public UserResponseDto updateUser(String jwt, UpdateuserRequest request) {
+        String userId = jwtService.extractUserId(jwt);
+        UUID refinedId = UUID.fromString(formatUUID(userId));
         User user = unwrapUser(userRepository.findById(refinedId), refinedId);
         
     if (!user.getEmail().equals(request.getEmail())) {
@@ -137,19 +135,6 @@ public class UserServiceImpl implements UserService{
             throw new IllegalArgumentException("New password cannot be the same as the old password.");
         }
     }
-
-    @Override
-    public StatsResponse getStats(String userId) {
-        User user = getUser(userId);
-        return dashboardService.getStats(user);
-    }
-
-    @Override
-    public List<AnalysisPreviewResponse> getRecentAnalyses(String userId) {
-        User user = getUser(userId);
-        return dashboardService.getRecentAnalyses(user);
-    }
-
 
     static User unwrapUser(Optional<User> entity, UUID id) {
         if (entity.isPresent()) return entity.get();

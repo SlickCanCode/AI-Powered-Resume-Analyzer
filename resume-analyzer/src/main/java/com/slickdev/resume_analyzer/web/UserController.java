@@ -2,28 +2,20 @@ package com.slickdev.resume_analyzer.web;
 
 
 
-import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
-import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
-import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
-import com.slickdev.resume_analyzer.reponses.ResumeResponse;
-import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
-import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.UserService;
 
 import jakarta.validation.Valid;
@@ -40,7 +32,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class UserController {
 
     private final UserService userService;
-    private final ResumeService resumeService;
 
     // implement redirecting to veriy otp page if the user is not verified and trying to register -
     // with unverified email. 
@@ -49,41 +40,21 @@ public class UserController {
         return new ResponseEntity<RegisterResponse>(userService.registerUser(user), HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
-	public ResponseEntity<UserResponseDto> getUser(@PathVariable String id) {
-		return new ResponseEntity<>(userService.getUserinfo(id), HttpStatus.OK);
+    @GetMapping("/me")
+	public ResponseEntity<UserResponseDto> getUser(@CookieValue(name = "access_token") String jwt) {
+		return new ResponseEntity<>(userService.getUserinfo(jwt), HttpStatus.OK);
 	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> editUser(@PathVariable String id, @Valid @RequestBody UpdateuserRequest request) {
-        return  new ResponseEntity<>(userService.updateUser(id,request), HttpStatus.OK);
+    @PutMapping("/me")
+    public ResponseEntity<UserResponseDto> editUser(@CookieValue(name = "access_token") String jwt, @Valid @RequestBody UpdateuserRequest request) {
+        return  new ResponseEntity<>(userService.updateUser(jwt,request), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable String id) {
-       userService.deleteUser(id);
+    @DeleteMapping("/me")
+    public ResponseEntity<HttpStatus> deleteUser(@CookieValue(name = "access_token") String jwt) {
+       userService.deleteUser(jwt);
        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }   
-
-    @PostMapping("/{id}/resumes")
-    public ResponseEntity<ResumeIdResponse> uploadUserResume(@PathVariable String id, @RequestParam("file") MultipartFile file) {
-        return new ResponseEntity<>(resumeService.parseFile(file, id), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}/resumes")
-    public ResponseEntity<List<ResumeResponse>> getAllresumes(@PathVariable String id) {
-        return new ResponseEntity<>(resumeService.getUserResumes(id), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}/dashboard/stats")
-    public ResponseEntity<StatsResponse> getStats(@PathVariable String id) {
-        return new ResponseEntity<>(userService.getStats(id), HttpStatus.OK);
-    }
-    
-    @GetMapping("/{id}/dashboard/recent-analyses")
-    public ResponseEntity<List<AnalysisPreviewResponse>> getRecentAnalyses(@PathVariable String id) {
-        return new ResponseEntity<>(userService.getRecentAnalyses(id), HttpStatus.OK);
-    }
     
 
 }

@@ -15,13 +15,12 @@ public interface UserService {
 
     User saveUser(User user);
     User getUser(String id);
-    UserResponseDto getUserinfo(String id);
-    UserResponseDto updateUser(String id, UpdateuserRequest  request);
+    UserResponseDto getUserinfo(String jwt);
+    UserResponseDto updateUser(String jwt, UpdateuserRequest  request);
     RegisterResponse registerUser(RegisterRequest user);
     void resetPassword(String jwt, String newPassword);
     User getUserByEmail(String email);
-    void deleteUser(String id);
+    void deleteUser(String jwt);
     boolean isEmailUnique(String email);
-    StatsResponse getStats(String id);
-    List<AnalysisPreviewResponse> getRecentAnalyses(String id);
+
 }

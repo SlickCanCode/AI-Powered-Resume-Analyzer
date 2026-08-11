@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "uploaded_resumes")
+@Table(name = "resumes")
 public class UploadedResume {
     
     @Id
@@ -42,19 +43,12 @@ public class UploadedResume {
     private String filename;
 
     @Column(name = "file_type")
-    private String contentType;
-
-    @Column(name = "source_url")
-    private String source_url;
-
-    @Lob
-    @NotBlank(message = "Content should not be blank")
-    @Column(name = "file_Content")
-    private String content;    
+    private String contentType;  
 
     @NotNull
     @Column(name = "analysis_count")
-    private int analysisCount;
+    @Builder.Default
+    private int analysisCount = 0;
 
     @ManyToOne(optional = true)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
@@ -64,18 +58,20 @@ public class UploadedResume {
     @OneToMany(mappedBy = "resume", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ResumeAnalysis> analysis;
 
+    @OneToOne(mappedBy = "resume", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ResumeData resumeData;
+
     @NotNull
     @Column(name = "created_at", nullable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
     
-    public UploadedResume (String fileName, String contentType, String content, String source_url, User user ) {
+    public UploadedResume (String fileName, String contentType, String content, User user, ResumeData resumeData) {
         this.filename = fileName;
         this.contentType = contentType;
-        this.content = content;
-        this.source_url = source_url;
         this.user = user;
+        this.resumeData = resumeData;
     }
 
 }

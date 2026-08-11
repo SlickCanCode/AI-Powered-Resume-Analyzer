@@ -4,5 +4,5 @@ import com.slickdev.resume_analyzer.entities.User;
 
 public interface SubscriptionService {
     
-    int getAnalysesAllowed(User user);
+    int getAnalysesAllowed(String userId);
 }

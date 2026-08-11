@@ -34,6 +34,7 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
@@ -52,29 +53,16 @@ public class ResumeServiceImpl implements ResumeService{
 
     private final CloudinaryService cloudinaryService;
     private final ResumeRepository resumeRepository;
+    private final GeminiService geminiService;
     private final UserServiceImpl userService;
+    private final JwtServiceImpl jwtService;
     private final RestTemplate restTemplate;
     private final PromptBuilder promptBuilder;
-
 
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
         return resumeRepository.save(resume);
-    }
-
-    @Override
-    public UploadedResume findResumeByContentAndUseremail(String email, String content) {
-        Optional<UploadedResume> resume = resumeRepository.findByUser_EmailAndContent(email, content);
-        if (resume.isPresent()) return resume.get();
-        else throw new EntityNotFoundException(email, UploadedResume.class);
-    }
-
-    @Override
-    public UploadedResume findByContent(String content) {
-        Optional<UploadedResume> resume = resumeRepository.findByContent(content);
-        if (resume.isPresent()) return resume.get();
-        else throw new EntityNotFoundException("the content", UploadedResume.class);
     }
 
     @Override
@@ -84,8 +72,9 @@ public class ResumeServiceImpl implements ResumeService{
     }
 
     @Override
-    public List<UploadedResume> getAnalyzedResumes(User user) {
-        return resumeRepository.findByUserAndAnalysisCountGreaterThan(user, 0);
+    public List<UploadedResume> getAnalyzedResumes(String userId) {
+        UUID refinedUserId = UUID.fromString(formatUUID(userId));
+        return resumeRepository.findByUserIdAndAnalysisCountGreaterThan(refinedUserId, 0);
     }
 
     static UploadedResume unwrapResume(Optional<UploadedResume> entity, UUID id) {
@@ -115,32 +104,33 @@ public class ResumeServiceImpl implements ResumeService{
         }
     }
 
+    // @Override
+    // public List<ResumeResponse> getUserResumes(String userId) {
+    //     List<UploadedResume> userResumes = resumeRepository.findAllByUser(userService.getUser(userId));
+    //     List<ResumeResponse> resumeResponses = new ArrayList<>();
+    //     ObjectMapper mapper = new ObjectMapper();
+
+    //     for (int i = 0; i < userResumes.size();i++) {
+
+    //         String fileName = userResumes.get(i).getFilename();
+    //         String sourceUrl = userResumes.get(i).getSource_url();
+    //         ResumeAnalysisResponse analysis = null;
+    //         if (userResumes.get(i).getAnalysis() != null) {
+    //             try {
+    //                 analysis = mapper.readValue(userResumes.get(i).getAnalysis(), ResumeAnalysisResponse.class);
+    //             } catch (JsonProcessingException e) {
+    //                 throw new RuntimeException("Unable to parse analysis");
+    //             }
+    //         }
+    //         resumeResponses.add(new ResumeResponse(fileName,sourceUrl,analysis));
+    //     }
+    //     Collections.reverse(resumeResponses);
+    //     return resumeResponses;
+    // }
+
     @Override
-    public List<ResumeResponse> getUserResumes(String userId) {
-        List<UploadedResume> userResumes = resumeRepository.findAllByUser(userService.getUser(userId));
-        List<ResumeResponse> resumeResponses = new ArrayList<>();
-        ObjectMapper mapper = new ObjectMapper();
-
-        for (int i = 0; i < userResumes.size();i++) {
-
-            String fileName = userResumes.get(i).getFilename();
-            String sourceUrl = userResumes.get(i).getSource_url();
-            ResumeAnalysisResponse analysis = null;
-            if (userResumes.get(i).getAnalysis() != null) {
-                try {
-                    analysis = mapper.readValue(userResumes.get(i).getAnalysis(), ResumeAnalysisResponse.class);
-                } catch (JsonProcessingException e) {
-                    throw new RuntimeException("Unable to parse analysis");
-                }
-            }
-            resumeResponses.add(new ResumeResponse(fileName,sourceUrl,analysis));
-        }
-        Collections.reverse(resumeResponses);
-        return resumeResponses;
-    }
-
-    @Override
-    public ResumeIdResponse parseFile(MultipartFile file, String userId) {
+    public ResumeIdResponse parseFile(MultipartFile file, String jwt) {
+        String userId = jwtService.extractUserId(jwt);
         try (BufferedInputStream inputStream = new BufferedInputStream(file.getInputStream())) {
             inputStream.mark(Integer.MAX_VALUE);
             String fileType = file.getContentType();
@@ -152,9 +142,17 @@ public class ResumeServiceImpl implements ResumeService{
                 throw new IllegalArgumentException("File type not supported");
             }
             boolean isPdf = fileType.equals("application/pdf");
+
+            boolean isWordDocument =
+                    fileType.equals("application/msword") ||
+                    fileType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
             boolean isImage = fileType.startsWith("image/");
-            if (!isPdf && !isImage) {
-                throw new IllegalArgumentException("Only PDF and maybe image files are allowed");
+
+            if (!isPdf && !isWordDocument && !isImage) {
+                throw new IllegalArgumentException(
+                        "Unsupported file type. Please upload a PDF, Word document, or image file."
+                );
             }
 
             // Extra Security for malformed pdfs 
@@ -182,19 +180,10 @@ public class ResumeServiceImpl implements ResumeService{
 
             String fileName =file.getOriginalFilename();
             String parsedContent = handler.toString();
-            String secure_url = cloudinaryService.uploadResume(file, userId, fileType);
-                
-                    User user = userService.getUser(userId);
-                    if (!resumeRepository.existsByUser_EmailAndContent(user.getEmail(), parsedContent)) {
-                        UploadedResume resume = saveResume(new UploadedResume(fileName, fileType, parsedContent, secure_url, user));
-                            if (user.getResumes()!=null ) { //avoid null pointer exception
-                                user.getResumes().add(resume);
-                            } else {
-                                user.setResumes(Arrays.asList(resume));
-                            }
-                            resumeRepository.save(resume);
-                    }
-                    UploadedResume resume = findResumeByContentAndUseremail(user.getEmail(), parsedContent);
+            ResumeData resumeData = geminiService.parseResume(parsedContent);
+
+            User user = userService.getUser(userId);
+            UploadedResume resume = new UploadedResume(fileName, fileType, parsedContent, user, resumeData);
                     return new ResumeIdResponse(resume.getId().toString());
 
             
@@ -205,50 +194,50 @@ public class ResumeServiceImpl implements ResumeService{
 
 
 
-    @Override
-    public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
-        UploadedResume resume = findById(id);
-        String resumeContent = resume.getContent();
-        String api_URL = ServiceConstants.API_URL;
+//     @Override
+//     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
+//         UploadedResume resume = findById(id);
+//         String resumeContent = resume.getContent();
+//         String api_URL = ServiceConstants.API_URL;
 
-        //Build request
-        String prompt = promptBuilder.buildPrompt(resumeContent, jobDescription);
-        Map<String,Object> requestBody = buildRequestBody(prompt);
+//         //Build request
+//         String prompt = promptBuilder.buildPrompt(resumeContent, jobDescription);
+//         Map<String,Object> requestBody = buildRequestBody(prompt);
         
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+//         HttpHeaders headers = new HttpHeaders();
+//         headers.setContentType(MediaType.APPLICATION_JSON);
 
-        //Wraping body and headers together
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-        //send request
-        try {
-                    ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                        api_URL, 
-                        HttpMethod.POST, 
-                        entity, 
-                        new ParameterizedTypeReference<Map<String, Object>>() {});
+//         //Wraping body and headers together
+//         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+//         //send request
+//         try {
+//                     ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+//                         api_URL, 
+//                         HttpMethod.POST, 
+//                         entity, 
+//                         new ParameterizedTypeReference<Map<String, Object>>() {});
 
-                        String aiResponse =  extractTextFromResponse(response);
-                        String aiResponseCleaned = aiResponse
-                                .replaceAll("(?s)```\\w*\\n", "")
-                                .replaceAll("```", "")
-                                .replaceFirst("(?i)^json:\\s*", "")
-                                .trim();
-                        resume.setAnalysis(aiResponseCleaned);
-                        resumeRepository.save(resume);
-                        ObjectMapper mapper = new ObjectMapper();
-                        ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
-                        return result;
+//                         String aiResponse =  extractTextFromResponse(response);
+//                         String aiResponseCleaned = aiResponse
+//                                 .replaceAll("(?s)```\\w*\\n", "")
+//                                 .replaceAll("```", "")
+//                                 .replaceFirst("(?i)^json:\\s*", "")
+//                                 .trim();
+//                         resume.setAnalysis(aiResponseCleaned);
+//                         resumeRepository.save(resume);
+//                         ObjectMapper mapper = new ObjectMapper();
+//                         ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
+//                         return result;
                 
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
-            throw new RuntimeException("Gemini API Error: " + e.getMessage());
-    } catch (ResourceAccessException e) {
-    // Timeout, no connection
-    throw new RuntimeException("Connection Error: " + e.getMessage());
-    } catch (JsonProcessingException e) {
-        throw new RuntimeException("Mapper Error: " + e.getMessage());
-    }
- } 
+//         } catch (HttpClientErrorException | HttpServerErrorException e) {
+//             throw new RuntimeException("Gemini API Error: " + e.getMessage());
+//     } catch (ResourceAccessException e) {
+//     // Timeout, no connection
+//     throw new RuntimeException("Connection Error: " + e.getMessage());
+//     } catch (JsonProcessingException e) {
+//         throw new RuntimeException("Mapper Error: " + e.getMessage());
+//     }
+//  } 
 
 
     private Map<String, Object> buildRequestBody(String prompt) {
