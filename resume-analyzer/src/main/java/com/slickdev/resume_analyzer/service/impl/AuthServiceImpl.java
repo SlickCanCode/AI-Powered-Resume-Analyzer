@@ -59,7 +59,8 @@ public class AuthServiceImpl implements AuthService {
 
     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     String resetToken = "No reset Token needed";
-        if (purpose.equals("reset-password")) {
+
+        if (purpose != null && purpose.equals("reset-password")) {
             resetToken = jwtService.generateResetToken(user);
         }
         return new VerifyOtpResponse(resetToken);

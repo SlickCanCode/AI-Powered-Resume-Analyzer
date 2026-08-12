@@ -12,4 +12,5 @@ public interface ResumeRepository extends JpaRepository<UploadedResume, UUID>{
     
     List<UploadedResume> findAllByUser(User user);
     List<UploadedResume> findByUserIdAndAnalysisCountGreaterThan(UUID userId, int count); 
+    boolean existsByIdAndUserId(UUID resumeId, UUID userId);
 }

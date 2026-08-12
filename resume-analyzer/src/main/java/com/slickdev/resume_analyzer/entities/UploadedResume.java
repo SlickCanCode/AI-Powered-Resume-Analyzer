@@ -39,11 +39,19 @@ public class UploadedResume {
     @GeneratedValue()
     private UUID id;
 
+    @NotBlank
+    @NotNull
     @Column(name = "file_name")
     private String filename;
 
     @Column(name = "file_type")
-    private String contentType;  
+    private String fileType;  
+
+    @Lob
+    @NotNull
+    @NotBlank(message = "Resume content cannot be blank")
+    @Column(name = "parsed_content", columnDefinition = "TEXT")
+    private String parsedContent;
 
     @NotNull
     @Column(name = "analysis_count")
@@ -65,13 +73,5 @@ public class UploadedResume {
     @Column(name = "created_at", nullable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    
-    public UploadedResume (String fileName, String contentType, String content, User user, ResumeData resumeData) {
-        this.filename = fileName;
-        this.contentType = contentType;
-        this.user = user;
-        this.resumeData = resumeData;
-    }
 
 }

@@ -70,16 +70,5 @@ public class ResumeData {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private List<ResumeEducation> education;
-
-    public ResumeData(UploadedResume resume, String fullName, String email, String phone, String location, String summary, List<ResumeOnlineProfile> onlineProfiles, List<String> skills, List<ResumeExperience> experience, List<ResumeEducation> education) {
-        this.fullName = fullName;
-        this.email = email;
-        this.phone = phone;
-        this.location = location;
-        this.summary = summary;
-        this.onlineProfiles = onlineProfiles;
-        this.skills = skills;
-        this.experience = experience;
-        this.education = education;
-    }
+    
 }

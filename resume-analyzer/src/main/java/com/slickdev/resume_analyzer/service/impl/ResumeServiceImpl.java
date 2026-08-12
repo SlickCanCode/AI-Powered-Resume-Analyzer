@@ -40,25 +40,28 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
+import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
+import com.slickdev.resume_analyzer.repositories.ResumeDataRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
+
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class ResumeServiceImpl implements ResumeService{
 
-    private final CloudinaryService cloudinaryService;
+
     private final ResumeRepository resumeRepository;
     private final GeminiService geminiService;
     private final UserServiceImpl userService;
     private final JwtServiceImpl jwtService;
-    private final RestTemplate restTemplate;
-    private final PromptBuilder promptBuilder;
-
+    private final ResumeDataRepository resumeDataRepository;
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
@@ -104,33 +107,10 @@ public class ResumeServiceImpl implements ResumeService{
         }
     }
 
-    // @Override
-    // public List<ResumeResponse> getUserResumes(String userId) {
-    //     List<UploadedResume> userResumes = resumeRepository.findAllByUser(userService.getUser(userId));
-    //     List<ResumeResponse> resumeResponses = new ArrayList<>();
-    //     ObjectMapper mapper = new ObjectMapper();
-
-    //     for (int i = 0; i < userResumes.size();i++) {
-
-    //         String fileName = userResumes.get(i).getFilename();
-    //         String sourceUrl = userResumes.get(i).getSource_url();
-    //         ResumeAnalysisResponse analysis = null;
-    //         if (userResumes.get(i).getAnalysis() != null) {
-    //             try {
-    //                 analysis = mapper.readValue(userResumes.get(i).getAnalysis(), ResumeAnalysisResponse.class);
-    //             } catch (JsonProcessingException e) {
-    //                 throw new RuntimeException("Unable to parse analysis");
-    //             }
-    //         }
-    //         resumeResponses.add(new ResumeResponse(fileName,sourceUrl,analysis));
-    //     }
-    //     Collections.reverse(resumeResponses);
-    //     return resumeResponses;
-    // }
-
     @Override
-    public ResumeIdResponse parseFile(MultipartFile file, String jwt) {
+    public ResumeDataResponse parseFile(MultipartFile file, String jwt) {
         String userId = jwtService.extractUserId(jwt);
+        User user = userService.getUser(userId);
         try (BufferedInputStream inputStream = new BufferedInputStream(file.getInputStream())) {
             inputStream.mark(Integer.MAX_VALUE);
             String fileType = file.getContentType();
@@ -182,17 +162,52 @@ public class ResumeServiceImpl implements ResumeService{
             String parsedContent = handler.toString();
             ResumeData resumeData = geminiService.parseResume(parsedContent);
 
-            User user = userService.getUser(userId);
-            UploadedResume resume = new UploadedResume(fileName, fileType, parsedContent, user, resumeData);
-                    return new ResumeIdResponse(resume.getId().toString());
+            UploadedResume resume = resumeRepository.save(UploadedResume.builder()
+            .filename(fileName)
+            .fileType(fileType)
+            .user(user)
+            .parsedContent(parsedContent)
+            .build());
+            resumeData.setResume(resume);
+            resumeDataRepository.save(resumeData);
 
-            
+        return ResumeDataResponse.builder()
+                .resumeId(resume.getId().toString())
+                .fullName(resumeData.getFullName())
+                .email(resumeData.getEmail())
+                .phone(resumeData.getPhone())
+                .skills(resumeData.getSkills())
+                .education(resumeData.getEducation())
+                .experience(resumeData.getExperience())
+                .build();
+
         }catch (IOException | TikaException | SAXException e) {
             throw new FileProcessingException("Unable to parse file:" + e.getMessage());
         }
     }
 
 
+    // public ResumeDataResponse getResumeData(String resumeId, String jwt) {
+    //     String userId = jwtService.extractUserId(jwt);
+    //     UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
+    //     UUID refinedUserId = UUID.fromString(formatUUID(userId));
+
+    //     if(!resumeRepository.existsByIdAndUserId(refinedResumeId, refinedUserId)) {
+    //         throw new EntityNotFoundException(refinedResumeId, UploadedResume.class);
+    //     }
+
+    //     ResumeData resumeData = resumeDataRepository.findByResumeId(refinedResumeId)
+    //             .orElseThrow(() -> new EntityNotFoundException(refinedResumeId, ResumeData.class));
+
+    //     return ResumeDataResponse.builder()
+    //             .fullName(resumeData.getFullName())
+    //             .email(resumeData.getEmail())
+    //             .phone(resumeData.getPhone())
+    //             .skills(resumeData.getSkills())
+    //             .education(resumeData.getEducation())
+    //             .experience(resumeData.getExperience())
+    //             .build();
+    // }
 
 //     @Override
 //     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {

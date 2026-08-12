@@ -35,9 +35,7 @@ public class GeminiService {
         System.out.println("Gemini Response: " + response.text());
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            // Convert the response text to a JSON object
             ResumeData resumeData = objectMapper.readValue(response.text(), ResumeData.class);
-            // Convert the JSON object back to a pretty-printed JSON string
             return resumeData;
         } catch (Exception e) {
             e.printStackTrace();

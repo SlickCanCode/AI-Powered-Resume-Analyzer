@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
+import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.service.ResumeService;
 
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 
 
@@ -33,10 +36,11 @@ public class ResumeController {
 
 
         @PostMapping("/upload")
-    public ResponseEntity<ResumeIdResponse> uploadUserResume(@CookieValue(name = "access_token") String jwt, @RequestParam("file") MultipartFile file) {
-        System.out.println(jwt);
+    public ResponseEntity<ResumeDataResponse> uploadUserResume(@CookieValue(name = "access_token") String jwt, @RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, jwt), HttpStatus.OK);
     }
+
+    
 
     // @GetMapping("/{id}/resumes")
     // public ResponseEntity<List<ResumeResponse>> getAllresumes(@PathVariable String id) {
@@ -47,7 +51,6 @@ public class ResumeController {
     // public ResponseEntity<ResumeAnalysisResponse> analyzeResume(@RequestBody String jobDescription, @PathVariable String id) {
     //     return new ResponseEntity<>(resumeService.analyzeResume(id, jobDescription) ,HttpStatus.OK);
     // }
-
     
 
 }

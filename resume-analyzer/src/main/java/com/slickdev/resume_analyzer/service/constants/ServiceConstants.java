@@ -23,7 +23,7 @@ public class ServiceConstants {
                 "phone", Schema.builder().type("STRING").build(),
                 "location", Schema.builder().type("STRING").build(),
                 "summary", Schema.builder().type("STRING").build(),
-                "online_profiles", Schema.builder()
+                "onlineProfiles", Schema.builder()
                     .type("ARRAY")
                     .items(
                         Schema.builder()
@@ -95,7 +95,7 @@ public class ServiceConstants {
                 "phone",
                 "location",
                 "summary",
-                "online_profiles",
+                "onlineProfiles",
                 "skills",
                 "experience",
                 "education"
