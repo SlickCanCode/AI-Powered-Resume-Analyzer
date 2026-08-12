@@ -3,17 +3,30 @@ package com.slickdev.resume_analyzer.reponses;
 import java.util.List;
 import java.util.Map;
 
+
+import com.slickdev.resume_analyzer.entities.resume_analysis.AnalysisGrammerIssue;
+import com.slickdev.resume_analyzer.entities.resume_analysis.AnalysisRecommendation;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
+
+
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
+@AllArgsConstructor
 public class ResumeAnalysisResponse {
-    
-    private int score;
-    private List<String> strengths;
-    private List<String> weaknesses;
-    private List<String> improvementSuggestions;
-    private List<Map<String,String>> jobRecommendations;
 
+    private String analysisId;
+    private Integer overallScore;
+    private Integer atsScore;
+    private Integer keywordScore;
+
+    private List<String> strengths;
+    private List<String> missingKeywords;
+    private List<String> foundKeywords;
+
+    private List<AnalysisGrammerIssue> grammarIssues;
+    private List<AnalysisRecommendation> recommendations;
 }

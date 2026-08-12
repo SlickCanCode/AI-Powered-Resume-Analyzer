@@ -1,5 +1,6 @@
 package com.slickdev.resume_analyzer.service.impl;
 
+import com.slickdev.resume_analyzer.repositories.ResumeAnalysisRepository;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
@@ -62,6 +64,7 @@ public class ResumeServiceImpl implements ResumeService{
     private final UserServiceImpl userService;
     private final JwtServiceImpl jwtService;
     private final ResumeDataRepository resumeDataRepository;
+    private final ResumeAnalysisRepository resumeAnalysisRepository;
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
@@ -209,73 +212,19 @@ public class ResumeServiceImpl implements ResumeService{
     //             .build();
     // }
 
-//     @Override
-//     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
-//         UploadedResume resume = findById(id);
-//         String resumeContent = resume.getContent();
-//         String api_URL = ServiceConstants.API_URL;
+    @Override
+    public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
+        UploadedResume resume = findById(id);
+        String resumeContent = resume.getParsedContent();
+        ResumeAnalysis analysis = geminiService.analyzeResume(resumeContent, jobDescription);
+        analysis.setResume(resume);
+        resume.setAnalysisCount(resume.getAnalysisCount() + 1);
+        resumeAnalysisRepository.save(analysis);
 
-//         //Build request
-//         String prompt = promptBuilder.buildPrompt(resumeContent, jobDescription);
-//         Map<String,Object> requestBody = buildRequestBody(prompt);
-        
-//         HttpHeaders headers = new HttpHeaders();
-//         headers.setContentType(MediaType.APPLICATION_JSON);
+        return new ResumeAnalysisResponse(analysis.getId().toString(), analysis.getOverallScore(), analysis.getAtsScore(),
+                     analysis.getKeywordScore(), analysis.getStrengths(), analysis.getMissingKeywords(), analysis.getMissingKeywords(), analysis.getGrammarIssues(), analysis.getRecommendations());
 
-//         //Wraping body and headers together
-//         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-//         //send request
-//         try {
-//                     ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-//                         api_URL, 
-//                         HttpMethod.POST, 
-//                         entity, 
-//                         new ParameterizedTypeReference<Map<String, Object>>() {});
+ } 
 
-//                         String aiResponse =  extractTextFromResponse(response);
-//                         String aiResponseCleaned = aiResponse
-//                                 .replaceAll("(?s)```\\w*\\n", "")
-//                                 .replaceAll("```", "")
-//                                 .replaceFirst("(?i)^json:\\s*", "")
-//                                 .trim();
-//                         resume.setAnalysis(aiResponseCleaned);
-//                         resumeRepository.save(resume);
-//                         ObjectMapper mapper = new ObjectMapper();
-//                         ResumeAnalysisResponse result = mapper.readValue(aiResponseCleaned, ResumeAnalysisResponse.class);
-//                         return result;
-                
-//         } catch (HttpClientErrorException | HttpServerErrorException e) {
-//             throw new RuntimeException("Gemini API Error: " + e.getMessage());
-//     } catch (ResourceAccessException e) {
-//     // Timeout, no connection
-//     throw new RuntimeException("Connection Error: " + e.getMessage());
-//     } catch (JsonProcessingException e) {
-//         throw new RuntimeException("Mapper Error: " + e.getMessage());
-//     }
-//  } 
-
-
-    private Map<String, Object> buildRequestBody(String prompt) {
-            Map<String, String> textPart = Map.of("text", prompt);
-            Map<String, Object> content = Map.of("parts", List.of(textPart));
-            return Map.of("contents", List.of(content));
-        }
-
-
-
-    @SuppressWarnings("unchecked")
-    private String extractTextFromResponse(ResponseEntity<Map<String, Object>> response) {
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.getBody().get("candidates");
-            if (candidates != null && !candidates.isEmpty()) {
-                Map<String, Object> firstCandidate = candidates.get(0);
-                Map<String, Object> content = (Map<String, Object>) firstCandidate.get("content");
-                List<Map<String, String>> parts = (List<Map<String, String>>) content.get("parts");
-                return parts.get(0).get("text");
-            }
-        } 
-        
-        return "An Unexpected Error Occured!, pls try again";
-    }
 
 }

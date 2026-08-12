@@ -61,20 +61,20 @@ public class DashboardServiceimpl implements DashboardService {
                 .toList();
 
         double avgResumeScore = analyses.stream()
-                .mapToInt(ResumeAnalysis::getScore)
+                .mapToInt(ResumeAnalysis::getOverallScore)
                 .average()
                 .orElse(0);
 
         double lastWeekResumeAvg = analyses.stream()
                         .filter(a -> !a.getCreatedAt().isBefore(startOfLastWeek)
                                 && a.getCreatedAt().isBefore(startOfThisWeek))
-                        .mapToInt(ResumeAnalysis::getScore)
+                        .mapToInt(ResumeAnalysis::getOverallScore)
                         .average()
                         .orElse(0);
 
         double thisWeekResumeAvg = analyses.stream()
                         .filter(a -> !a.getCreatedAt().isBefore(startOfThisWeek))
-                        .mapToInt(ResumeAnalysis::getScore)
+                        .mapToInt(ResumeAnalysis::getOverallScore)
                         .average()
                         .orElse(0);
 
@@ -126,7 +126,7 @@ public class DashboardServiceimpl implements DashboardService {
                         ResumeAnalysis latestAnalysis = resume.getAnalysis().get(resume.getAnalysis().size() - 1);
                         return new AnalysisPreviewResponse(
                                 resume.getFilename(),
-                                latestAnalysis.getScore(),
+                                latestAnalysis.getOverallScore(),
                                 latestAnalysis.getAtsScore(),
                                 latestAnalysis.getCreatedAt().toString()
                         );

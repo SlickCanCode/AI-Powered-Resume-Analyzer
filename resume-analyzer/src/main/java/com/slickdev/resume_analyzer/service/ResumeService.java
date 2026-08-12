@@ -15,7 +15,7 @@ public interface ResumeService {
     UploadedResume saveResume (UploadedResume resume);
     UploadedResume findById(String id);
     ResumeDataResponse parseFile(MultipartFile file, String jwt);
-    // ResumeAnalysisResponse analyzeResume(String id, String jobDescription);
+    ResumeAnalysisResponse analyzeResume(String id, String jobDescription);
     // List<ResumeResponse> getUserResumes(String id);
     List<UploadedResume> getAnalyzedResumes(String userId);
     

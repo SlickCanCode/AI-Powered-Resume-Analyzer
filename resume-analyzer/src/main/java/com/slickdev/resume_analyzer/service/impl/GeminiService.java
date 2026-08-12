@@ -7,6 +7,7 @@ import com.google.genai.Client;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.ThinkingConfig;
+import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
 
@@ -32,7 +33,7 @@ public class GeminiService {
 
         GenerateContentResponse response =
         geminiClient.models.generateContent("gemini-2.5-flash", String.format(ServiceConstants.RESUME_PARSING_PROMPT, resumeContent), config);
-        System.out.println("Gemini Response: " + response.text());
+
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             ResumeData resumeData = objectMapper.readValue(response.text(), ResumeData.class);
@@ -41,5 +42,28 @@ public class GeminiService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public ResumeAnalysis analyzeResume(String resumeContent, String jobDescription) {
+
+        GenerateContentConfig config = 
+            GenerateContentConfig.builder()
+                .responseMimeType("application/json")
+                .candidateCount(1)
+                .responseSchema(ServiceConstants.ANALYSIS_SCHEMA)
+                .build();
+
+        GenerateContentResponse response = geminiClient.models.
+            generateContent("gemini-2.5-flash", String.format(ServiceConstants.RESUME_ANALYSIS_PROMPT, resumeContent, jobDescription), config);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            ResumeAnalysis analysisData = objectMapper.readValue(response.text(), ResumeAnalysis.class);
+            return analysisData;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+
     }
 }

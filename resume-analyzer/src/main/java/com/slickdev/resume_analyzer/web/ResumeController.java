@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
+import com.slickdev.resume_analyzer.requests.AnalysisRequest;
 import com.slickdev.resume_analyzer.service.ResumeService;
 
 import lombok.AllArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 
@@ -40,17 +42,17 @@ public class ResumeController {
         return new ResponseEntity<>(resumeService.parseFile(file, jwt), HttpStatus.OK);
     }
 
-    
+        @PostMapping("/{id}/analyze")
+    public ResponseEntity<ResumeAnalysisResponse> analyzeResume(@RequestBody AnalysisRequest request , @PathVariable String id) {
+        return new ResponseEntity<>(resumeService.analyzeResume(id, request.getJobDescription()) ,HttpStatus.OK);
+    }
 
     // @GetMapping("/{id}/resumes")
     // public ResponseEntity<List<ResumeResponse>> getAllresumes(@PathVariable String id) {
     //     return new ResponseEntity<>(resumeService.getUserResumes(id), HttpStatus.OK);
     // }
 
-    // @PostMapping("/{id}/analyze")
-    // public ResponseEntity<ResumeAnalysisResponse> analyzeResume(@RequestBody String jobDescription, @PathVariable String id) {
-    //     return new ResponseEntity<>(resumeService.analyzeResume(id, jobDescription) ,HttpStatus.OK);
-    // }
+
     
 
 }

@@ -1,11 +1,15 @@
 CREATE TABLE resume_analysis (
     id UUID PRIMARY KEY,
     resume_id UUID NOT NULL,
-    score INT NOT NULL,
+    overall_score INT NOT NULL,
     ats_score INT NOT NULL,
+    keyword_score INT NOT NULL,
     strengths JSONB NOT NULL,
     weaknesses JSONB NOT NULL,
-    improvement_suggestions JSONB NOT NULL,
+    missing_keywords JSONB NOT NULL,
+    found_keywords JSONB NOT NULL,
+    grammar_issues JSONB NOT NULL,
+    recommendations JSONB NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT fk_resume_analysis_resume
