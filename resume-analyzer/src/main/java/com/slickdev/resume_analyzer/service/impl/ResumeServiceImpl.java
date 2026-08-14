@@ -197,6 +197,9 @@ public class ResumeServiceImpl implements ResumeService{
                 .fullName(resumeData.getFullName())
                 .email(resumeData.getEmail())
                 .phone(resumeData.getPhone())
+                .location(resumeData.getLocation())
+                .summary(resumeData.getCareerSummary())
+                .onlineProfiles(resumeData.getOnlineProfiles())
                 .skills(resumeData.getSkills())
                 .education(resumeData.getEducation())
                 .experience(resumeData.getExperience())
@@ -245,7 +248,7 @@ public class ResumeServiceImpl implements ResumeService{
                 .email(resumeData.getEmail())
                 .phone(resumeData.getPhone())
                 .location(resumeData.getLocation())
-                .summary(resumeData.getSummary())
+                .summary(resumeData.getCareerSummary())
                 .onlineProfiles(resumeData.getOnlineProfiles())
                 .skills(resumeData.getSkills())
                 .education(resumeData.getEducation())
@@ -260,8 +263,8 @@ public class ResumeServiceImpl implements ResumeService{
                 analysis.getAtsScore(),
                 analysis.getKeywordScore(),
                 analysis.getStrengths(),
-                analysis.getMissingKeywords(),
-                analysis.getFoundKeywords(),
+                analysis.getNeededSkills(),
+                analysis.getValuableSkills(),
                 analysis.getGrammarIssues(),
                 analysis.getRecommendations());
     }

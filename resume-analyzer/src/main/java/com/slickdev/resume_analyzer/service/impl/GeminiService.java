@@ -25,8 +25,6 @@ public class GeminiService {
 
         GenerateContentConfig config = 
             GenerateContentConfig.builder()
-                // Sets the thinking budget to 0 to disable thinking mode
-                .thinkingConfig(ThinkingConfig.builder().thinkingBudget(0).build())
                 .responseMimeType("application/json")
                 .candidateCount(1)
                 .responseSchema(ServiceConstants.PARSING_SCHEMA)
@@ -34,7 +32,7 @@ public class GeminiService {
 
         GenerateContentResponse response =
         geminiClient.models.generateContent("gemini-2.5-flash", String.format(ServiceConstants.RESUME_PARSING_PROMPT, resumeContent), config);
-
+        System.out.println(response.text());
         ObjectMapper objectMapper = new ObjectMapper();
         try {
             ResumeData resumeData = objectMapper.readValue(response.text(), ResumeData.class);
@@ -75,7 +73,7 @@ public class GeminiService {
                 .candidateCount(1)
                 .responseSchema(ServiceConstants.JOB_MATCH_SCHEMA)
                 .build();
-
+        System.out.println(jobContent);
         GenerateContentResponse response = geminiClient.models.generateContent(
                 "gemini-2.5-flash",
                 String.format(ServiceConstants.JOB_MATCH_PROMPT, resumeContent, jobContent),

@@ -79,12 +79,12 @@ public class ResumeAnalysis {
     private List<String> weaknesses;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "missing_keywords", nullable = false, columnDefinition = "jsonb")
-    private List<String> missingKeywords;
+    @Column(name = "valuable_skills", nullable = false, columnDefinition = "jsonb")
+    private List<String> neededSkills;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "found_keywords", nullable = false, columnDefinition = "jsonb")
-    private List<String> foundKeywords;
+    @Column(name = "needed_skills", nullable = false, columnDefinition = "jsonb")
+    private List<String> valuableSkills;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "grammar_issues", nullable = false, columnDefinition = "jsonb")

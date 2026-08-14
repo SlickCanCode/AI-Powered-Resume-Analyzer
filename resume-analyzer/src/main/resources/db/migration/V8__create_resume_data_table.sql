@@ -5,7 +5,7 @@ CREATE TABLE resume_data (
     email VARCHAR(255) NOT NULL,
     phone VARCHAR(50) NOT NULL,
     location VARCHAR(255) NOT NULL,
-    summary TEXT,
+    career_summary TEXT,
     online_profiles JSONB,
     skills JSONB,
     experience JSONB,

@@ -24,8 +24,8 @@ public class ResumeAnalysisResponse {
     private Integer keywordScore;
 
     private List<String> strengths;
-    private List<String> missingKeywords;
-    private List<String> foundKeywords;
+    private List<String> neededSkills;
+    private List<String> valuableSkills;
 
     private List<AnalysisGrammerIssue> grammarIssues;
     private List<AnalysisRecommendation> recommendations;

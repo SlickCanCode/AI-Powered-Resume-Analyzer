@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.drew.lang.annotations.NotNull;
 import com.slickdev.resume_analyzer.entities.resume_data.ResumeEducation;
 import com.slickdev.resume_analyzer.entities.resume_data.ResumeExperience;
 import com.slickdev.resume_analyzer.entities.resume_data.ResumeOnlineProfile;
@@ -52,9 +53,10 @@ public class ResumeData {
     @Column(nullable = false, length = 255)
     private String location;
 
-    @Column(columnDefinition = "TEXT")
-    private String summary;
+    @Column(name = "career_summary", columnDefinition = "TEXT")
+    private String careerSummary;
 
+    @NotNull
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "online_profiles", columnDefinition = "jsonb")
     private List<ResumeOnlineProfile> onlineProfiles;

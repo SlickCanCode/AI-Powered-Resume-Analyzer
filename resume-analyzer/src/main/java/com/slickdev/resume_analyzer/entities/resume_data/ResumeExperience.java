@@ -16,5 +16,5 @@ public class ResumeExperience {
     String title;
     String company;
     String period;
-    List<String> Highlights;
+    List<String> highlights;
 }

@@ -22,7 +22,7 @@ public class ServiceConstants {
                 "email", Schema.builder().type("STRING").build(),
                 "phone", Schema.builder().type("STRING").build(),
                 "location", Schema.builder().type("STRING").build(),
-                "summary", Schema.builder().type("STRING").build(),
+                "careerSummary", Schema.builder().type("STRING").build(),
                 "onlineProfiles", Schema.builder()
                     .type("ARRAY")
                     .items(
@@ -94,7 +94,7 @@ public class ServiceConstants {
                 "email",
                 "phone",
                 "location",
-                "summary",
+                "careerSummary",
                 "onlineProfiles",
                 "skills",
                 "experience",
@@ -152,7 +152,7 @@ public class ServiceConstants {
             )
             .build(),
 
-        "missingKeywords",
+        "neededSkills",
         Schema.builder()
             .type("ARRAY")
             .items(
@@ -160,7 +160,7 @@ public class ServiceConstants {
             ).description("Short keyword or phrase from the job requirements; maximum 4 words; never a sentence")
             .build(),
 
-        "foundKeywords",
+        "valuableSkills",
         Schema.builder()
             .type("ARRAY")
             .items(
@@ -220,8 +220,8 @@ public class ServiceConstants {
         "keywordScore",
         "strengths",
         "weaknesses",
-        "missingKeywords",
-        "foundKeywords",
+        "neededSkills",
+        "valuableSkills",
         "grammarIssues",
         "recommendations"
     ))
@@ -397,29 +397,51 @@ public class ServiceConstants {
 
             Do not invent errors or assume information that is not present.
 
-            Keywords
-            Found Keywords
+            ### Skills
 
-            Include keywords that are found in the resume that matches the job description.
+            #### neededSkills
 
-            Prioritize meaningful requirements over generic words. Do not count incidental mentions as meaningful matches.
+            Identify the most important skills, technologies, qualifications, and capabilities that the candidate **needs for this specific job** based on the job description.
 
-            Missing Keywords
+            Include requirements that are:
 
-            Include important requirements or concepts that are absent, weakly supported, or insufficiently demonstrated.
+            * Explicitly required by the job
+            * Essential to performing the core responsibilities
+            * Strongly implied as necessary for the role
+            * Missing, weakly supported, or insufficiently demonstrated in the resume
+
+            Prioritize requirements by importance to the role. Do not include generic requirements or minor preferences.
+
+            Only include skills that are genuinely supported by the job description. Do not invent requirements.
+
+            Do not classify a skill as needed if the resume already demonstrates it through a legitimate equivalent, synonym, or clearly equivalent technology.
+
+            #### valuableSkills
+
+            Identify skills from the job description that the candidate **does not currently demonstrate or could strengthen**, but that would provide a meaningful competitive advantage for this particular role.
 
             Prioritize:
 
-            Required skills and technologies
-            Required qualifications
-            Core responsibilities
-            Required experience
-            Important domain terminology
-            High-value preferred requirements
+            * High-value preferred skills
+            * Technologies commonly associated with the role
+            * Skills that differentiate candidates
+            * Skills that complement the candidate's existing experience
+            * Skills that could materially improve the candidate's competitiveness
 
-            Do not mark a requirement as missing when the resume clearly demonstrates it through a legitimate equivalent term.
+            `valuableSkills` should represent **advantageous skills**, not mandatory requirements.
 
-            Never recommend adding a keyword unless the candidate genuinely possesses the underlying skill or experience.
+            Do not simply repeat `neededSkills`. A skill should appear in `valuableSkills` only when it provides meaningful additional value beyond the core requirements.
+
+            Never suggest that the candidate falsely claim a skill or experience they do not possess.
+
+            For both fields:
+
+            * Use concise skill names or short phrases.
+            * Maximum 4 words per item.
+            * Do not write sentences.
+            * Avoid duplicates.
+            * Prioritize the most important items rather than listing every skill mentioned in the job description.
+
 
             Scoring
 
