@@ -9,8 +9,8 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ResumeResponse {
     
-    private String name;
-    private String source_url;
-    private ResumeAnalysisResponse analysis;
-
+    String name;
+    String uploadDate;
+    int latestScore;
+    int analysisCount;
 }

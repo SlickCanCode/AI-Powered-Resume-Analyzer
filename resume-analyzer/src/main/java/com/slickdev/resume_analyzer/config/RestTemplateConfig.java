@@ -6,8 +6,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import okhttp3.OkHttpClient;
+
 @Configuration
 public class RestTemplateConfig {
+
+    @Bean
+    public OkHttpClient okHttpClient() {
+        return new OkHttpClient.Builder()
+                .followRedirects(true)
+                .followSslRedirects(true)
+                .connectTimeout(java.time.Duration.ofSeconds(10))
+                .readTimeout(java.time.Duration.ofSeconds(20))
+                .callTimeout(java.time.Duration.ofSeconds(30))
+                .build();
+    }
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {

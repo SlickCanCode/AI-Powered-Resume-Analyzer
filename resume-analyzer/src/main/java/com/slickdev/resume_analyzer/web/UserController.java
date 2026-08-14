@@ -51,9 +51,9 @@ public class UserController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<HttpStatus> deleteUser(@CookieValue(name = "access_token") String jwt) {
+    public ResponseEntity<Void> deleteUser(@CookieValue(name = "access_token") String jwt) {
        userService.deleteUser(jwt);
-       return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+       return ResponseEntity.noContent().build();
     }   
     
 

@@ -3,6 +3,7 @@ CREATE TABLE resumes (
     file_name VARCHAR(255),
     file_type VARCHAR(255),
     parsed_content TEXT,
+    latest_score INT,
     analysis_count INT NOT NULL DEFAULT 0,
     user_id UUID NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

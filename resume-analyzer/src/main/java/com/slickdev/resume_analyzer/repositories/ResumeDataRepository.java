@@ -10,4 +10,5 @@ import com.slickdev.resume_analyzer.entities.ResumeData;
 public interface ResumeDataRepository extends JpaRepository<ResumeData, UUID>   {
     
     Optional<ResumeData> findByResumeId(UUID resumeId);
+    Optional<ResumeData> findByResumeIdAndResumeUserId(UUID resumeId, UUID userId);
 }

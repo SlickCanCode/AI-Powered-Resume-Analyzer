@@ -41,6 +41,8 @@ import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
+import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
@@ -65,6 +67,7 @@ public class ResumeServiceImpl implements ResumeService{
     private final JwtServiceImpl jwtService;
     private final ResumeDataRepository resumeDataRepository;
     private final ResumeAnalysisRepository resumeAnalysisRepository;
+    private final JobPostingExtractor jobPostingExtractor;
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
@@ -108,6 +111,21 @@ public class ResumeServiceImpl implements ResumeService{
         } catch (IOException e) {
             return false;
         }
+    }
+
+    @Override
+    public List<ResumeResponse> getAllResumes(String jwt) {
+        UUID userId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));
+
+        return resumeRepository.findAllByUserId(userId)
+                .stream()
+                .map(resume -> new ResumeResponse(
+                        resume.getFilename(),
+                        resume.getCreatedAt().toString(),
+                        resume.getLatestScore(),
+                        resume.getAnalysisCount()
+                ))
+                .toList();
     }
 
     @Override
@@ -190,41 +208,91 @@ public class ResumeServiceImpl implements ResumeService{
     }
 
 
-    // public ResumeDataResponse getResumeData(String resumeId, String jwt) {
-    //     String userId = jwtService.extractUserId(jwt);
-    //     UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
-    //     UUID refinedUserId = UUID.fromString(formatUUID(userId));
+    @Override
+    public ResumeDataResponse getResumeData(String resumeId, String jwt) {
+        UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
+        UUID refinedUserId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));
+        ResumeData resumeData = resumeDataRepository.findByResumeIdAndResumeUserId(refinedResumeId, refinedUserId)
+                .orElseThrow(() -> new EntityNotFoundException(refinedResumeId, ResumeData.class));
 
-    //     if(!resumeRepository.existsByIdAndUserId(refinedResumeId, refinedUserId)) {
-    //         throw new EntityNotFoundException(refinedResumeId, UploadedResume.class);
-    //     }
+        return toResumeDataResponse(resumeData);
+    }
 
-    //     ResumeData resumeData = resumeDataRepository.findByResumeId(refinedResumeId)
-    //             .orElseThrow(() -> new EntityNotFoundException(refinedResumeId, ResumeData.class));
+    @Override
+    public List<ResumeAnalysisResponse> getResumeAnalyses(String resumeId, String jwt) {
+        UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
+        UUID refinedUserId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));
+        if (!resumeRepository.existsByIdAndUserId(refinedResumeId, refinedUserId)) {
+            throw new EntityNotFoundException(refinedResumeId, UploadedResume.class);
+        }
 
-    //     return ResumeDataResponse.builder()
-    //             .fullName(resumeData.getFullName())
-    //             .email(resumeData.getEmail())
-    //             .phone(resumeData.getPhone())
-    //             .skills(resumeData.getSkills())
-    //             .education(resumeData.getEducation())
-    //             .experience(resumeData.getExperience())
-    //             .build();
-    // }
+        return resumeAnalysisRepository.findByResumeIdAndResumeUserIdOrderByCreatedAtDesc(refinedResumeId, refinedUserId)
+                .stream()
+                .map(this::toResumeAnalysisResponse)
+                .toList();
+    }
+
+    @Override
+    public List<AnalysisSummaryResponse> getAllAnalyses(String jwt) {
+        UUID userId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));
+        return resumeAnalysisRepository.findAllSummariesByUserId(userId);
+    }
+
+    private ResumeDataResponse toResumeDataResponse(ResumeData resumeData) {
+        return ResumeDataResponse.builder()
+                .resumeId(resumeData.getResume().getId().toString())
+                .fullName(resumeData.getFullName())
+                .email(resumeData.getEmail())
+                .phone(resumeData.getPhone())
+                .location(resumeData.getLocation())
+                .summary(resumeData.getSummary())
+                .onlineProfiles(resumeData.getOnlineProfiles())
+                .skills(resumeData.getSkills())
+                .education(resumeData.getEducation())
+                .experience(resumeData.getExperience())
+                .build();
+    }
+
+    private ResumeAnalysisResponse toResumeAnalysisResponse(ResumeAnalysis analysis) {
+        return new ResumeAnalysisResponse(
+                analysis.getId().toString(),
+                analysis.getOverallScore(),
+                analysis.getAtsScore(),
+                analysis.getKeywordScore(),
+                analysis.getStrengths(),
+                analysis.getMissingKeywords(),
+                analysis.getFoundKeywords(),
+                analysis.getGrammarIssues(),
+                analysis.getRecommendations());
+    }
 
     @Override
     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
         UploadedResume resume = findById(id);
         String resumeContent = resume.getParsedContent();
+        // put Subscription check 
         ResumeAnalysis analysis = geminiService.analyzeResume(resumeContent, jobDescription);
+        // put SubscriptionUsage increment
         analysis.setResume(resume);
         resume.setAnalysisCount(resume.getAnalysisCount() + 1);
+        resume.setLatestScore(analysis.getOverallScore());
         resumeAnalysisRepository.save(analysis);
 
-        return new ResumeAnalysisResponse(analysis.getId().toString(), analysis.getOverallScore(), analysis.getAtsScore(),
-                     analysis.getKeywordScore(), analysis.getStrengths(), analysis.getMissingKeywords(), analysis.getMissingKeywords(), analysis.getGrammarIssues(), analysis.getRecommendations());
+        return toResumeAnalysisResponse(analysis);
 
  } 
+
+    @Override
+    public JobMatchResponse analyzeJobMatch(String id, String jobLink) {
+        UploadedResume resume = findById(id);
+        try {
+            return geminiService.analyzeJobMatch(resume.getParsedContent(), jobPostingExtractor.extract(jobLink));
+        } catch (JobPostingExtractor.JobPageUnavailableException exception) {
+            return geminiService.analyzeJobMatch(
+                    resume.getParsedContent(),
+                    "Job URL: " + jobLink + "\nRetrieve this job posting and extract its requirements before matching it to the resume.");
+        }
+    }
 
 
 }

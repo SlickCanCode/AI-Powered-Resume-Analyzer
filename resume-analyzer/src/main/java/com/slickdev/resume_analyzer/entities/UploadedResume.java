@@ -52,6 +52,9 @@ public class UploadedResume {
     @NotBlank(message = "Resume content cannot be blank")
     @Column(name = "parsed_content", columnDefinition = "TEXT")
     private String parsedContent;
+    
+    @Column(name="latest_score")
+    private int latestScore;
 
     @NotNull
     @Column(name = "analysis_count")

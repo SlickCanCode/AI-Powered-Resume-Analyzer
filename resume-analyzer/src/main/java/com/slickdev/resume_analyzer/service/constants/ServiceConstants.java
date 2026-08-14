@@ -157,7 +157,7 @@ public class ServiceConstants {
             .type("ARRAY")
             .items(
                 Schema.builder().type("STRING").build()
-            )
+            ).description("Short keyword or phrase from the job requirements; maximum 4 words; never a sentence")
             .build(),
 
         "foundKeywords",
@@ -165,7 +165,7 @@ public class ServiceConstants {
             .type("ARRAY")
             .items(
                 Schema.builder().type("STRING").build()
-            )
+            ).description("Short keyword or phrase from the job requirements; maximum 4 words; never a sentence")
             .build(),
 
         "grammarIssues",
@@ -226,6 +226,96 @@ public class ServiceConstants {
         "recommendations"
     ))
     .build();
+
+        public static final Schema JOB_MATCH_SCHEMA = Schema.builder()
+            .type("OBJECT")
+            .properties(Map.of(
+                "matchScore", Schema.builder().type("INTEGER").build(),
+                "foundSkills", Schema.builder().type("ARRAY").items(Schema.builder().type("STRING").description("Short keyword or phrase from the job requirements; maximum 4 words; never a sentence").build()).build(),
+                "missingSkills", Schema.builder().type("ARRAY").items(Schema.builder().type("STRING").description("Short keyword or phrase from the job requirements; maximum 4 words; never a sentence").build()).build(),
+                "aiSuggestions", Schema.builder().type("ARRAY").items(Schema.builder().type("STRING").build()).build()
+            ))
+            .required(List.of("matchScore", "foundSkills", "missingSkills", "aiSuggestions"))
+            .build();
+
+        public static final String JOB_MATCH_PROMPT = """
+
+            Compare the candidate's resume against the provided job posting and produce a strict, evidence-based match assessment.
+
+            Evaluate the match **from the perspective of the job requirements**, not the resume alone.
+
+            ### Skill Matching
+
+            Identify the important skills, technologies, qualifications, and requirements explicitly stated in the job posting.
+
+            **foundSkills** must contain only important skills or requirements that:
+
+            * Are stated or clearly required by the job posting, AND
+            * Are explicitly listed or convincingly demonstrated in the resume.
+            * Use the terminology from the job posting where possible.
+            * Do not include skills that exist only in the resume but are irrelevant to the job.
+
+            **missingSkills** must contain important skills or requirements that:
+
+            * Are stated or clearly required by the job posting, AND
+            * Are absent from the resume or not sufficiently supported by evidence in the resume.
+            * Do not mark a skill as missing when the resume clearly demonstrates a legitimate equivalent or synonym.
+            * Prioritize required skills over preferred skills.
+
+            Do not treat vaguely related technologies as equivalent. For example, do not assume JavaScript means Java, SQL means PostgreSQL, React means React Native, or AWS means every AWS service.
+
+            ### Match Score
+
+            Score the overall match from **0–100** based primarily on how well the resume satisfies the job's important requirements.
+
+            Consider:
+
+            * Required skills and technologies
+            * Preferred skills
+            * Relevant experience
+            * Qualifications
+            * Responsibilities
+            * Education and certifications when relevant
+            * Strength and relevance of the evidence in the resume
+
+            Required requirements should have substantially more influence on the score than optional requirements.
+
+            Use conservative scoring. A high score requires strong evidence that the candidate satisfies most of the important requirements. Do not give a high score simply because the resume contains many skills or is professionally written.
+
+            ### AI Suggestions
+
+            Provide concise, high-impact suggestions for improving the candidate's match for this specific job.
+
+            Suggestions should:
+
+            * Be directly related to gaps between the job and resume
+            * Focus on the highest-impact improvements
+            * Be actionable
+            * Be truthful
+            * Never recommend fabricating experience, skills, qualifications, certifications, or achievements
+
+            If a missing skill is genuinely possessed by the candidate but simply absent from the resume, suggest making that experience visible. Otherwise, do not suggest adding it.
+
+            ### Output Rules
+
+            Keep `foundSkills`, `missingSkills`, and `aiSuggestions` concise:
+
+            * Use keywords or short phrases only.
+            * Maximum 4 words per item.
+            * Never write sentences in these fields.
+            * Avoid duplicates.
+            * Prioritize the most important items rather than listing every minor requirement.
+
+            If the job posting is provided only as a URL, retrieve and analyze the actual job requirements from that URL before evaluating the match.
+
+            Return only the structured response required by the provided schema. Do not output additional explanations.
+
+            Resume:
+            %s
+
+            Job posting:
+            %s
+            """;
 
 
         public static final String RESUME_ANALYSIS_PROMPT = """ 
@@ -310,7 +400,7 @@ public class ServiceConstants {
             Keywords
             Found Keywords
 
-            Include important job-specific keywords and concepts that are genuinely supported by the resume.
+            Include keywords that are found in the resume that matches the job description.
 
             Prioritize meaningful requirements over generic words. Do not count incidental mentions as meaningful matches.
 

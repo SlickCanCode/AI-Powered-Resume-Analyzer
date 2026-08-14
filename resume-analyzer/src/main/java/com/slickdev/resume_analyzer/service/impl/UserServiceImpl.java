@@ -103,8 +103,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void deleteUser(String jwt) {
         String userId = jwtService.extractUserId(jwt);
-        getUser(userId);
-        userRepository.deleteById(UUID.fromString(formatUUID(userId)));
+        userRepository.delete(getUser(userId));
     }
 
     @Override
