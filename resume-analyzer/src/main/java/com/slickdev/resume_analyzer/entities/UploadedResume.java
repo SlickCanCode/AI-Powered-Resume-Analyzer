@@ -77,4 +77,7 @@ public class UploadedResume {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    public void increaseAnalysisCount() {
+        this.analysisCount++;
+    }
 }

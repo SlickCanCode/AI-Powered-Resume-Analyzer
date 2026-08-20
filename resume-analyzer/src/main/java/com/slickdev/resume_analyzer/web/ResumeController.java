@@ -52,7 +52,7 @@ public class ResumeController {
         return new ResponseEntity<>(resumeService.analyzeResume(id, request.getJobDescription()) ,HttpStatus.OK);
     }
 
-            @PostMapping("/{id}/analyze/job-match")
+        @PostMapping("/{id}/analyze/job-match")
     public ResponseEntity<JobMatchResponse> analyzeJobMatch(@RequestBody JobMatchRequest request , @PathVariable String id) {
             return new ResponseEntity<>(resumeService.analyzeJobMatch(id, request.jobLink()), HttpStatus.OK);
         }

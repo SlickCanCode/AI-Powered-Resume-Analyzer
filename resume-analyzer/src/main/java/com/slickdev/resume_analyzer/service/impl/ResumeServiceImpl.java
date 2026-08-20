@@ -265,6 +265,7 @@ public class ResumeServiceImpl implements ResumeService{
                 analysis.getAtsScore(),
                 analysis.getKeywordScore(),
                 analysis.getStrengths(),
+                analysis.getWeaknesses(),
                 analysis.getNeededSkills(),
                 analysis.getValuableSkills(),
                 analysis.getGrammarIssues(),
@@ -291,7 +292,7 @@ public class ResumeServiceImpl implements ResumeService{
         
         // Update resume metadata
         analysis.setResume(resume);
-        resume.setAnalysisCount(resume.getAnalysisCount() + 1);
+        resume.increaseAnalysisCount();
         resume.setLatestScore(analysis.getOverallScore());
         resumeAnalysisRepository.save(analysis);
 
@@ -312,12 +313,15 @@ public class ResumeServiceImpl implements ResumeService{
 
         try {
             JobMatchResponse response = geminiService.analyzeJobMatch(resume.getParsedContent(), jobPostingExtractor.extract(jobLink));
-            subscriptionService.incrementAnalysisUsage(userId);          
+            subscriptionService.incrementAnalysisUsage(userId);  
+            resume.increaseAnalysisCount();        
             return response;
         } catch (JobPostingExtractor.JobPageUnavailableException exception) {
-            return geminiService.analyzeJobMatch(
+            JobMatchResponse response = geminiService.analyzeJobMatch(
                     resume.getParsedContent(),
                     "Job URL: " + jobLink + "\nRetrieve this job posting and extract its requirements before matching it to the resume.");
+            resume.increaseAnalysisCount();
+            return response;
         }
     }
 

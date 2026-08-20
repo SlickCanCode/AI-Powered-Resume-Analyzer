@@ -24,6 +24,8 @@ public class ResumeAnalysisResponse {
     private Integer keywordScore;
 
     private List<String> strengths;
+    private List<String> weaknesses;
+    
     private List<String> neededSkills;
     private List<String> valuableSkills;
 
