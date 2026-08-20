@@ -31,7 +31,7 @@ public class CustomAuthenticationManager implements AuthenticationManager{
 
         User user = userService.getUserByEmail(authentication.getName());
         if (!passwordEncoder.matches(authentication.getCredentials().toString(), user.getPassword())) {
-            throw new RuntimeException("Incorrect password!");
+            throw new RuntimeException("Invalid email or password");
         }
         return new UsernamePasswordAuthenticationToken(authentication.getName(), user.getPassword());
     }

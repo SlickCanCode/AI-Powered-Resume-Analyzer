@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class AuthController {
     
     private final AuthService authService;
-
+    // In future, refactor the controllers for DRY
     @PostMapping("/send-otp")
     public ResponseEntity<HttpStatus> sendOtp(@RequestBody SendOtpRequest request) {
         authService.sendOtp(request.email());

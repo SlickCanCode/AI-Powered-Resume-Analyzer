@@ -125,6 +125,7 @@ public class DashboardServiceimpl implements DashboardService {
                         .map(resume -> {
                         ResumeAnalysis latestAnalysis = resume.getAnalysis().get(resume.getAnalysis().size() - 1);
                         return new AnalysisPreviewResponse(
+                                latestAnalysis.getId().toString(),
                                 resume.getFilename(),
                                 latestAnalysis.getOverallScore(),
                                 latestAnalysis.getAtsScore(),

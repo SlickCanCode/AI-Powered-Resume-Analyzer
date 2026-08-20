@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -20,6 +21,9 @@ import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OAuth2SuccessHandler;
 import com.slickdev.resume_analyzer.service.UserService;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import com.slickdev.resume_analyzer.security.filters.JWTAuthorizationFilter;
 
 
@@ -32,10 +36,11 @@ import lombok.AllArgsConstructor;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private CustomAuthenticationManager authentication;
+    private final CustomAuthenticationManager authentication;
     private final UserService  userService;
     private final JwtService  jwtService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final JWTAuthorizationFilter jwtAuthorizationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -51,10 +56,17 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.POST, SecurityConstants.REGISTER_PATH).permitAll()
             .anyRequest().authenticated()
         )
+        .exceptionHandling(exception -> exception
+            .defaultAuthenticationEntryPointFor(
+                 (request, response, authException) ->
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED),
+                new AntPathRequestMatcher("/api/**")
+            )
+        )
         .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler))
         .addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
         .addFilter(authenticationFilter)
-        .addFilterAfter(new JWTAuthorizationFilter(), AuthenticationFilter.class)
+        .addFilterAfter(jwtAuthorizationFilter, AuthenticationFilter.class)
         .headers(headers -> headers.frameOptions(frameOption -> frameOption.sameOrigin()))
         .sessionManagement(session ->
             session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)

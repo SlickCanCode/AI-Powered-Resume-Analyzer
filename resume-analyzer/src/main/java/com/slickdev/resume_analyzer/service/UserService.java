@@ -7,6 +7,7 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.StatsResponse;
+import com.slickdev.resume_analyzer.reponses.SubscriptionUsageResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
@@ -22,5 +23,11 @@ public interface UserService {
     User getUserByEmail(String email);
     void deleteUser(String jwt);
     boolean isEmailUnique(String email);
+    
+    /**
+     * Get current subscription usage information for a user.
+     * Includes plan, quota, and remaining analyses.
+     */
+    SubscriptionUsageResponse getSubscriptionUsage(String jwt);
 
 }

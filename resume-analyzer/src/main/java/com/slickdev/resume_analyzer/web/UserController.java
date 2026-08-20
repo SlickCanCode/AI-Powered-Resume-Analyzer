@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
+import com.slickdev.resume_analyzer.reponses.SubscriptionUsageResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
@@ -33,8 +34,7 @@ public class UserController {
 
     private final UserService userService;
 
-    // implement redirecting to veriy otp page if the user is not verified and trying to register -
-    // with unverified email. 
+
     @PostMapping("")
     public ResponseEntity<RegisterResponse> saveUser(@Valid @RequestBody RegisterRequest user) {
         return new ResponseEntity<RegisterResponse>(userService.registerUser(user), HttpStatus.CREATED);
@@ -55,6 +55,11 @@ public class UserController {
        userService.deleteUser(jwt);
        return ResponseEntity.noContent().build();
     }   
+
+    @GetMapping("/subscription")
+    public ResponseEntity<SubscriptionUsageResponse> getSubscriptionUsage(@CookieValue(name = "access_token") String jwt) {
+        return new ResponseEntity<>(userService.getSubscriptionUsage(jwt), HttpStatus.OK);
+    }
     
 
 }

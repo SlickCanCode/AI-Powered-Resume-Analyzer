@@ -1,5 +1,5 @@
 package com.slickdev.resume_analyzer.reponses;
 
-public record AnalysisPreviewResponse(String name, int score, int atsScore, String date) {
+public record AnalysisPreviewResponse(String id, String fileName, int resumeScore, int atsScore, String date) {
     
 }

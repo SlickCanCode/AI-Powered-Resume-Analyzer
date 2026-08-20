@@ -50,6 +50,7 @@ import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeDataRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
+import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
 
 import jakarta.transaction.Transactional;
@@ -68,6 +69,7 @@ public class ResumeServiceImpl implements ResumeService{
     private final ResumeDataRepository resumeDataRepository;
     private final ResumeAnalysisRepository resumeAnalysisRepository;
     private final JobPostingExtractor jobPostingExtractor;
+    private final SubscriptionService subscriptionService;
 
     @Override
     public UploadedResume saveResume(UploadedResume resume) {
@@ -272,10 +274,22 @@ public class ResumeServiceImpl implements ResumeService{
     @Override
     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
         UploadedResume resume = findById(id);
+        String userId = resume.getUser().getId().toString();
+        
+        // Check if user has remaining analysis quota
+        if (!subscriptionService.hasAnalysisQuota(userId)) {
+            throw new com.slickdev.resume_analyzer.exception.RateLimitException(
+                    "You have reached your monthly analysis limit. Please upgrade your subscription."
+            );
+        }
+        
         String resumeContent = resume.getParsedContent();
-        // put Subscription check 
         ResumeAnalysis analysis = geminiService.analyzeResume(resumeContent, jobDescription);
-        // put SubscriptionUsage increment
+        
+        // Increment subscription usage
+        subscriptionService.incrementAnalysisUsage(userId);
+        
+        // Update resume metadata
         analysis.setResume(resume);
         resume.setAnalysisCount(resume.getAnalysisCount() + 1);
         resume.setLatestScore(analysis.getOverallScore());
@@ -288,8 +302,18 @@ public class ResumeServiceImpl implements ResumeService{
     @Override
     public JobMatchResponse analyzeJobMatch(String id, String jobLink) {
         UploadedResume resume = findById(id);
+        String userId = resume.getUser().getId().toString();
+
+        if (!subscriptionService.hasAnalysisQuota(userId)) {
+            throw new com.slickdev.resume_analyzer.exception.RateLimitException(
+                    "You have reached your monthly analysis limit. Please upgrade your subscription."
+            );
+        }
+
         try {
-            return geminiService.analyzeJobMatch(resume.getParsedContent(), jobPostingExtractor.extract(jobLink));
+            JobMatchResponse response = geminiService.analyzeJobMatch(resume.getParsedContent(), jobPostingExtractor.extract(jobLink));
+            subscriptionService.incrementAnalysisUsage(userId);          
+            return response;
         } catch (JobPostingExtractor.JobPageUnavailableException exception) {
             return geminiService.analyzeJobMatch(
                     resume.getParsedContent(),

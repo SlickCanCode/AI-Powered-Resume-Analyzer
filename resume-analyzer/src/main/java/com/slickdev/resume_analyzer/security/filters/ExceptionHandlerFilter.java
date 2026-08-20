@@ -25,7 +25,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter{
         } catch (EntityNotFoundException e) {
             ApiError error = new ApiError(
                 HttpServletResponse.SC_NOT_FOUND,
-                "User does not exist"
+                "Invalid email or password"
             );
 
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);

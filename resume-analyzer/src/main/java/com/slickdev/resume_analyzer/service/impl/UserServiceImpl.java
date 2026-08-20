@@ -16,12 +16,14 @@ import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.StatsResponse;
+import com.slickdev.resume_analyzer.reponses.SubscriptionUsageResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OtpService;
+import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.UserService;
 
 
@@ -54,6 +56,12 @@ public class UserServiceImpl implements UserService{
         this.otpService = otpService;
     }
 
+    SubscriptionService subscriptionService;
+    @Autowired
+    public void setSubscriptionService(SubscriptionService subscriptionService) {
+        this.subscriptionService = subscriptionService;
+    }
+
 
     @Override
     public RegisterResponse registerUser(RegisterRequest user) {
@@ -68,7 +76,10 @@ public class UserServiceImpl implements UserService{
          user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         if (isEmailUnique(user.getEmail())) {
-            return userRepository.save(user);
+            User savedUser = userRepository.save(user);
+            // Create default subscription for new user
+            subscriptionService.createDefaultSubscription(savedUser);
+            return savedUser;
         }
         User existingUser = getUserByEmail(user.getEmail());
          if (!existingUser.isEmailVerified()) {
@@ -151,6 +162,22 @@ public class UserServiceImpl implements UserService{
         "$1-$2-$3-$4-$5"
     );
 }
+
+    @Override
+    public SubscriptionUsageResponse getSubscriptionUsage(String jwt) {
+        String userId = jwtService.extractUserId(jwt);
+        
+        // Get subscription info
+        com.slickdev.resume_analyzer.entities.Subscription subscription = subscriptionService.getSubscription(userId);
+        int analysesAllowed = subscriptionService.getAnalysesAllowed(userId);
+        int analysesUsed = subscriptionService.getAnalysesUsed(userId);
+        
+        return SubscriptionUsageResponse.fromMetrics(
+                subscription.getPlan().toString(),
+                analysesAllowed,
+                analysesUsed
+        );
+    }
 
    
 
