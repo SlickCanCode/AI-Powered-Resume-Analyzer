@@ -46,7 +46,7 @@ public class ResumeController {
     public ResponseEntity<ResumeDataResponse> uploadUserResume(@CookieValue(name = "access_token") String jwt, @RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, jwt), HttpStatus.OK);
     }
-
+ 
         @PostMapping("/{id}/analyze")
     public ResponseEntity<ResumeAnalysisResponse> analyzeResume(@RequestBody AnalysisRequest request , @PathVariable String id) {
         return new ResponseEntity<>(resumeService.analyzeResume(id, request.getJobDescription()) ,HttpStatus.OK);
