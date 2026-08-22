@@ -1,5 +1,8 @@
 package com.slickdev.resume_analyzer.reponses;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,17 +36,26 @@ public class SubscriptionUsageResponse {
     /** Whether user has analyses remaining */
     private Boolean hasQuotaRemaining;
 
+    private LocalDateTime startPeriod;
+
+    private LocalDateTime endPeriod;
+    
+    private Long daysLeft;
+
     /**
      * Factory method to build response from usage metrics.
      * Automatically calculates remaining and percentage.
      */
     public static SubscriptionUsageResponse fromMetrics(
             String plan,
+            LocalDateTime startPeriod,
+            LocalDateTime endPeriod,
             Integer analysesAllowed,
             Integer analysesUsed) {
         
         Integer remaining = analysesAllowed - analysesUsed;
         Integer percentage = (int) ((double) analysesUsed / analysesAllowed * 100);
+        Long daysLeft = Duration.between(startPeriod, endPeriod).toDays();
         Boolean hasQuota = remaining > 0;
         
         return SubscriptionUsageResponse.builder()
@@ -53,6 +65,9 @@ public class SubscriptionUsageResponse {
                 .analysesRemaining(remaining)
                 .usagePercentage(percentage)
                 .hasQuotaRemaining(hasQuota)
+                .startPeriod(startPeriod)
+                .endPeriod(endPeriod)
+                .daysLeft(daysLeft)
                 .build();
     }
 }

@@ -10,7 +10,6 @@ import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
 import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
-import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 
 public interface ResumeService {
@@ -22,6 +21,6 @@ public interface ResumeService {
     List<UploadedResume> getAnalyzedResumes(String userId);
     JobMatchResponse analyzeJobMatch(String id, String jobLink);
     ResumeDataResponse getResumeData(String resumeId, String jwt);
-    List<ResumeAnalysisResponse> getResumeAnalyses(String resumeId, String jwt);
+    ResumeAnalysisResponse getResumeAnalyses(String resumeId, String jwt);
     List<AnalysisSummaryResponse> getAllAnalyses(String jwt);
 }

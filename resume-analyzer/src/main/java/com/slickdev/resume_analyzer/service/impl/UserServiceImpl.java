@@ -1,21 +1,23 @@
 package com.slickdev.resume_analyzer.service.impl;
 
 
-import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.slickdev.resume_analyzer.entities.Subscription;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
-import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
-import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.reponses.SubscriptionUsageResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
@@ -25,6 +27,8 @@ import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OtpService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.UserService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 
 
@@ -64,9 +68,18 @@ public class UserServiceImpl implements UserService{
 
 
     @Override
-    public RegisterResponse registerUser(RegisterRequest user) {
+    public RegisterResponse registerUser(RegisterRequest user, HttpServletResponse response) {
         User savedUser = saveUser(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
-        otpService.sendOtp(otpService.generateOtp(savedUser), savedUser.getEmail());
+        String jwt = jwtService.generateToken(savedUser);
+            ResponseCookie cookie = ResponseCookie.from("access_token", jwt)
+            .httpOnly(true)
+            .secure(true) // false for local HTTP
+            .path("/")
+            .sameSite("None") // or "Lax" if frontend is on the same domain
+            .maxAge(Duration.ofDays(1))
+            .build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return new RegisterResponse(savedUser.getEmail());
     }
 
@@ -108,7 +121,7 @@ public class UserServiceImpl implements UserService{
     public User getUserByEmail(String email) {
         Optional<User> entity = userRepository.findByEmail(email);
         if (entity.isPresent()) return entity.get();
-        else throw new EntityNotFoundException(email, User.class);
+        else throw new EntityNotFoundException(email);
     }
 
     @Override
@@ -168,12 +181,16 @@ public class UserServiceImpl implements UserService{
         String userId = jwtService.extractUserId(jwt);
         
         // Get subscription info
-        com.slickdev.resume_analyzer.entities.Subscription subscription = subscriptionService.getSubscription(userId);
+        Subscription subscription = subscriptionService.checkSubscription(userId);
+        LocalDateTime startPeriod = subscription.getCurrentPeriodStart();
+        LocalDateTime endPeriod = subscription.getCurrentPeriodEnd();
         int analysesAllowed = subscriptionService.getAnalysesAllowed(userId);
         int analysesUsed = subscriptionService.getAnalysesUsed(userId);
         
         return SubscriptionUsageResponse.fromMetrics(
                 subscription.getPlan().toString(),
+                startPeriod,
+                endPeriod,
                 analysesAllowed,
                 analysesUsed
         );

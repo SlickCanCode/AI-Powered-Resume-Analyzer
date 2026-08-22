@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.naming.ServiceUnavailableException;
+
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,12 +22,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.slickdev.resume_analyzer.exception.ErrorResponse;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
 import com.slickdev.resume_analyzer.exception.RateLimitException;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.slickdev.resume_analyzer.exception.BadRequestException;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 
 
-
+@Slf4j
 @ControllerAdvice
 public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler {
     
@@ -40,6 +46,12 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ServiceUnavailableException.class)
+    public ResponseEntity<Object> handleServiceUnavailable(RuntimeException ex) {
+        ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
+        return new ResponseEntity<>(error, HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
     @ExceptionHandler(RateLimitException.class)
     public ResponseEntity<Object> handleRateLimitException(RateLimitException ex) {
         ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
@@ -50,6 +62,15 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
     public ResponseEntity<Object> handleDuplicateResourceException(DuplicateResourceException ex) {
         ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataAccessResourceFailureException.class)
+    public ResponseEntity<?> handleDatabaseDown(Exception e) {
+        log.error("Database unavailable", e);
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Service temporarily unavailable");
     }
 
     @ExceptionHandler(BadRequestException.class)

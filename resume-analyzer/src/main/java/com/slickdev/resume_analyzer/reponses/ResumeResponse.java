@@ -9,6 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ResumeResponse {
     
+    String id;
     String name;
     String uploadDate;
     int latestScore;

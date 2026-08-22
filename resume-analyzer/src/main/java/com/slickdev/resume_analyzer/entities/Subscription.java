@@ -71,4 +71,9 @@ public class Subscription {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void setPeriod(int months) {
+        this.currentPeriodStart = LocalDateTime.now();
+        this.currentPeriodEnd = LocalDateTime.now().plusMonths(months);
+    }
 }

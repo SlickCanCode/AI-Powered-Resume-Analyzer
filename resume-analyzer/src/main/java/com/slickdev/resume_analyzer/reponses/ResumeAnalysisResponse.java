@@ -19,6 +19,7 @@ import lombok.Getter;
 public class ResumeAnalysisResponse {
 
     private String analysisId;
+    private String resumeId;
     private Integer overallScore;
     private Integer atsScore;
     private Integer keywordScore;
@@ -26,8 +27,8 @@ public class ResumeAnalysisResponse {
     private List<String> strengths;
     private List<String> weaknesses;
     
-    private List<String> neededSkills;
-    private List<String> valuableSkills;
+    private List<String> existingSkills;
+    private List<String> skillToDevelop;
 
     private List<AnalysisGrammerIssue> grammarIssues;
     private List<AnalysisRecommendation> recommendations;

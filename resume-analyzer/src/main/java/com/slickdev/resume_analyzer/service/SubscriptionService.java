@@ -13,6 +13,8 @@ public interface SubscriptionService {
      */
     void createDefaultSubscription(User user);
 
+    Subscription checkSubscription(String userId);
+
     /**
      * Gets the subscription for a user.
      */
@@ -54,5 +56,5 @@ public interface SubscriptionService {
     /**
      * Upgrade or downgrade user subscription plan.
      */
-    void updateSubscriptionPlan(String userId, SubscriptionPlan newPlan);
+    void updateSubscriptionPlan(String userId, SubscriptionPlan newPlan, int months);
 }

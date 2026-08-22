@@ -17,7 +17,7 @@ import com.slickdev.resume_analyzer.repositories.SubscriptionRepository;
 import com.slickdev.resume_analyzer.repositories.SubscriptionUsageRepository;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -50,6 +50,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .user(user)
                 .plan(SubscriptionPlan.FREE)
                 .status(SubscriptionStatus.ACTIVE)
+                .currentPeriodStart(LocalDateTime.now())
+                .currentPeriodEnd(LocalDateTime.now().plusMonths(1))
                 .build();
 
         subscriptionRepository.save(subscription);
@@ -63,6 +65,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 .build();
 
         usageRepository.save(usage);
+    }
+
+    @Override
+    public Subscription checkSubscription(String userId) {
+        Subscription subscription = getSubscription(userId);
+        //check if the current period end has reached.
+        if (subscription.getCurrentPeriodEnd().isEqual(LocalDateTime.now())) {
+            if (subscription.getPlan().equals(SubscriptionPlan.FREE)) {
+                resetUsageForNewPeriod(userId);
+            } else {
+                updateSubscriptionPlan(userId, SubscriptionPlan.FREE,1);
+            }
+        }
+        return subscription;
+        //later remiders and grace time should be sent before updating.
     }
 
     /**
@@ -97,8 +114,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     /**
-     * Increments the analysis usage count for a user.
-     * Checks quota before incrementing.
      * 
      * @throws RateLimitException if quota exceeded
      */
@@ -106,24 +121,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public void incrementAnalysisUsage(String userId) {
         SubscriptionUsage usage = getSubscriptionUsage(userId);
 
-        if (!hasAnalysisQuota(userId)) {
-            throw new RateLimitException(
-                    String.format("Analysis quota exceeded. You have used %d out of %d allowed analyses.",
-                            usage.getResumeAnalysesUsed(), usage.getResumesAnalysesAllowed())
-            );
-        }
-
         usage.setResumeAnalysesUsed(usage.getResumeAnalysesUsed() + 1);
         usageRepository.save(usage);
     }
 
     /**
-     * Get the number of analyses allowed for a user based on their plan.
+     * Get the number of analyses currently allowed for a user based on their plan.
      */
     @Override
     public int getAnalysesAllowed(String userId) {
+        checkSubscription(userId);
         SubscriptionUsage usage = getSubscriptionUsage(userId);
-        return usage.getResumesAnalysesAllowed();
+        return usage.getResumesAnalysesAllowed()-usage.getResumeAnalysesUsed();
     }
 
     /**
@@ -143,6 +152,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubscriptionUsage usage = getSubscriptionUsage(userId);
         Subscription subscription = getSubscription(userId);
 
+        //Reset Start and End
+        subscription.setPeriod(1);
         // Reset usage counter
         usage.setResumeAnalysesUsed(0);
 
@@ -160,17 +171,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
      * Updates both subscription and usage records.
      */
     @Override
-    public void updateSubscriptionPlan(String userId, SubscriptionPlan newPlan) {
+    public void updateSubscriptionPlan(String userId, SubscriptionPlan newPlan, int months) {
         Subscription subscription = getSubscription(userId);
         SubscriptionUsage usage = getSubscriptionUsage(userId);
 
         // Update subscription plan
         subscription.setPlan(newPlan);
+        subscription.setPeriod(months);
         subscriptionRepository.save(subscription);
 
         // Update usage limits based on new plan
         int newMonthlyLimit = SubscriptionPlanConfig.getConfig(newPlan).getMonthlyAnalysisLimit();
         usage.setResumesAnalysesAllowed(newMonthlyLimit);
+        usage.setResumeAnalysesUsed(0);
         usageRepository.save(usage);
     }
 

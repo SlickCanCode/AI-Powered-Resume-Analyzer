@@ -15,13 +15,17 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.entities.VerificationToken;
 import com.slickdev.resume_analyzer.exception.BadRequestException;
 import com.slickdev.resume_analyzer.exception.RateLimitException;
+import com.slickdev.resume_analyzer.exception.ServiceUnavailableException;
 import com.slickdev.resume_analyzer.repositories.VerificationTokenRepository;
 import com.slickdev.resume_analyzer.service.OtpService;
 import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
 
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class OtpServiceImpl implements OtpService {
     
@@ -72,8 +76,8 @@ public class OtpServiceImpl implements OtpService {
         try {
              resend.emails().send(params);
         } catch (ResendException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to send OTP email: " + e.getMessage());
+            log.error("Email Provider error: " + e);
+            throw new ServiceUnavailableException("Email Service");
         }
     }
 

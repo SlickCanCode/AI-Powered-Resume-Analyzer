@@ -19,6 +19,7 @@ import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,10 +35,9 @@ public class UserController {
 
     private final UserService userService;
 
-
     @PostMapping("")
-    public ResponseEntity<RegisterResponse> saveUser(@Valid @RequestBody RegisterRequest user) {
-        return new ResponseEntity<RegisterResponse>(userService.registerUser(user), HttpStatus.CREATED);
+    public ResponseEntity<RegisterResponse> saveUser(@Valid @RequestBody RegisterRequest user, HttpServletResponse response) {
+        return new ResponseEntity<RegisterResponse>(userService.registerUser(user, response), HttpStatus.CREATED);
     }
 
     @GetMapping("/me")

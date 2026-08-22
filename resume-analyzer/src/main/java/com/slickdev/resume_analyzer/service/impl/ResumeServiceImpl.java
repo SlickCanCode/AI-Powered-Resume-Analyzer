@@ -18,23 +18,10 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.parser.ocr.TesseractOCRConfig;
 import org.apache.tika.sax.BodyContentHandler;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
@@ -45,13 +32,11 @@ import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
 import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
-import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeDataRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
-import com.slickdev.resume_analyzer.service.constants.ServiceConstants;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -79,7 +64,7 @@ public class ResumeServiceImpl implements ResumeService{
     @Override
     public UploadedResume findById(String id) {
         UUID refinedId = UUID.fromString(formatUUID(id));
-        return unwrapResume(resumeRepository.findById(refinedId), refinedId);
+        return unwrap(resumeRepository.findById(refinedId), refinedId, UploadedResume.class);
     }
 
     @Override
@@ -88,9 +73,12 @@ public class ResumeServiceImpl implements ResumeService{
         return resumeRepository.findByUserIdAndAnalysisCountGreaterThan(refinedUserId, 0);
     }
 
-    static UploadedResume unwrapResume(Optional<UploadedResume> entity, UUID id) {
-        if (entity.isPresent()) return entity.get();
-        else throw new EntityNotFoundException(id, UploadedResume.class);
+    public <T> T unwrap(Optional<T> entity, UUID id, Class<T> entityClass) {
+        if (entity.isPresent()) {
+            return entity.get();
+        }
+
+        throw new EntityNotFoundException(id, entityClass);
     }
 
     private String formatUUID(String raw) {
@@ -122,6 +110,7 @@ public class ResumeServiceImpl implements ResumeService{
         return resumeRepository.findAllByUserId(userId)
                 .stream()
                 .map(resume -> new ResumeResponse(
+                        resume.getId().toString(),
                         resume.getFilename(),
                         resume.getCreatedAt().toString(),
                         resume.getLatestScore(),
@@ -212,7 +201,6 @@ public class ResumeServiceImpl implements ResumeService{
         }
     }
 
-
     @Override
     public ResumeDataResponse getResumeData(String resumeId, String jwt) {
         UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
@@ -223,18 +211,16 @@ public class ResumeServiceImpl implements ResumeService{
         return toResumeDataResponse(resumeData);
     }
 
-    @Override
-    public List<ResumeAnalysisResponse> getResumeAnalyses(String resumeId, String jwt) {
-        UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
-        UUID refinedUserId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));
-        if (!resumeRepository.existsByIdAndUserId(refinedResumeId, refinedUserId)) {
-            throw new EntityNotFoundException(refinedResumeId, UploadedResume.class);
-        }
+    //This returns the first resume Analysis for now because i believe no resume should have more than one normal analyses unless the resume was edited.
 
-        return resumeAnalysisRepository.findByResumeIdAndResumeUserIdOrderByCreatedAtDesc(refinedResumeId, refinedUserId)
-                .stream()
-                .map(this::toResumeAnalysisResponse)
-                .toList();
+    @Override
+    public ResumeAnalysisResponse getResumeAnalyses(String resumeId, String jwt) {
+        UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
+        ResumeAnalysis analysis = unwrap(resumeAnalysisRepository.findFirstByResumeId(refinedResumeId), null, ResumeAnalysis.class);
+        return new ResumeAnalysisResponse(analysis.getId().toString(), resumeId, analysis.getOverallScore(),
+         analysis.getAtsScore(), analysis.getKeywordScore(), analysis.getStrengths(), analysis.getWeaknesses(),
+          analysis.getExistingSkills(), analysis.getSkillsToDevelop(), analysis.getGrammarIssues(), analysis.getRecommendations());
+
     }
 
     @Override
@@ -258,16 +244,17 @@ public class ResumeServiceImpl implements ResumeService{
                 .build();
     }
 
-    private ResumeAnalysisResponse toResumeAnalysisResponse(ResumeAnalysis analysis) {
+    private ResumeAnalysisResponse toResumeAnalysisResponse(ResumeAnalysis analysis, String resumeId) {
         return new ResumeAnalysisResponse(
                 analysis.getId().toString(),
+                resumeId,
                 analysis.getOverallScore(),
                 analysis.getAtsScore(),
                 analysis.getKeywordScore(),
                 analysis.getStrengths(),
                 analysis.getWeaknesses(),
-                analysis.getNeededSkills(),
-                analysis.getValuableSkills(),
+                analysis.getExistingSkills(),
+                analysis.getSkillsToDevelop(),
                 analysis.getGrammarIssues(),
                 analysis.getRecommendations());
     }
@@ -296,7 +283,7 @@ public class ResumeServiceImpl implements ResumeService{
         resume.setLatestScore(analysis.getOverallScore());
         resumeAnalysisRepository.save(analysis);
 
-        return toResumeAnalysisResponse(analysis);
+        return toResumeAnalysisResponse(analysis, resume.getId().toString());
 
  } 
 

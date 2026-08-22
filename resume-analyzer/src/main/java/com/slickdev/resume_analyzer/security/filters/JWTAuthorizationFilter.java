@@ -11,8 +11,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.security.SecurityConstants;
 import com.slickdev.resume_analyzer.service.JwtService;
+import com.slickdev.resume_analyzer.service.UserService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,6 +29,12 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter{
     @Autowired 
     public void setJwtService(JwtService jwtService) {
         this.jwtService = jwtService;
+    }
+
+    UserService userService;
+    @Autowired
+    public void setUser(UserService userService) {
+        this.userService = userService;
     }
 
     //Authorization: Bearer JWT
@@ -52,7 +60,15 @@ public class JWTAuthorizationFilter extends OncePerRequestFilter{
                     filterChain.doFilter(request, response);
                     return;
                 }
+        //prevent user that does'nt exist from making requests
         String user = jwtService.extractUserId(token);
+                try{
+                    userService.getUser(user);
+                }catch(EntityNotFoundException e) {
+                    filterChain.doFilter(request, response);
+                    return;
+                }
+                
         Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         filterChain.doFilter(request, response);

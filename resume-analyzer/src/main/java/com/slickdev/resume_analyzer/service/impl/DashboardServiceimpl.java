@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
-import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.service.DashboardService;
@@ -100,7 +99,7 @@ public class DashboardServiceimpl implements DashboardService {
 
         double atsScoreImprovement = thisWeekAtsAvg - lastWeekAtsAvg;
 
-        int analysesAvailable = subscriptionService.getAnalysesAllowed(userId);
+        int analysesThisMonth = subscriptionService.getAnalysesUsed(userId);
         return new StatsResponse(
             totalAnalyzedResumes,
             totalAnalyzedResumesThisWeek,
@@ -108,7 +107,7 @@ public class DashboardServiceimpl implements DashboardService {
             (int) resumeScoreImprovement,
             (int) avgAtsScore,
             (int) atsScoreImprovement,
-            analysesAvailable
+            analysesThisMonth
         );
 }
 
@@ -126,6 +125,7 @@ public class DashboardServiceimpl implements DashboardService {
                         ResumeAnalysis latestAnalysis = resume.getAnalysis().get(resume.getAnalysis().size() - 1);
                         return new AnalysisPreviewResponse(
                                 latestAnalysis.getId().toString(),
+                                resume.getId().toString(),
                                 resume.getFilename(),
                                 latestAnalysis.getOverallScore(),
                                 latestAnalysis.getAtsScore(),

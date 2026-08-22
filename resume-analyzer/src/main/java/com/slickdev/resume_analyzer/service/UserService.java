@@ -1,16 +1,15 @@
 package com.slickdev.resume_analyzer.service;
 
 
-import java.util.List;
 
 import com.slickdev.resume_analyzer.entities.User;
-import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
-import com.slickdev.resume_analyzer.reponses.StatsResponse;
 import com.slickdev.resume_analyzer.reponses.SubscriptionUsageResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface UserService {
 
@@ -18,7 +17,7 @@ public interface UserService {
     User getUser(String id);
     UserResponseDto getUserinfo(String jwt);
     UserResponseDto updateUser(String jwt, UpdateuserRequest  request);
-    RegisterResponse registerUser(RegisterRequest user);
+    RegisterResponse registerUser(RegisterRequest user, HttpServletResponse response);
     void resetPassword(String jwt, String newPassword);
     User getUserByEmail(String email);
     void deleteUser(String jwt);

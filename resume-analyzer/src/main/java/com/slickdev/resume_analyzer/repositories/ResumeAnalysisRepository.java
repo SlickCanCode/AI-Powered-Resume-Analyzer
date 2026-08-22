@@ -1,6 +1,7 @@
 package com.slickdev.resume_analyzer.repositories;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,11 +12,11 @@ import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
 
 public interface ResumeAnalysisRepository extends JpaRepository<ResumeAnalysis, UUID> { 
-    List<ResumeAnalysis> findByResumeIdAndResumeUserIdOrderByCreatedAtDesc(UUID resumeId, UUID userId);
+    Optional<ResumeAnalysis> findFirstByResumeId(UUID resumeId);
 
     @Query("""
             select new com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse(
-                resume.filename, analysis.createdAt, analysis.overallScore, analysis.atsScore)
+                resume.id, resume.filename, analysis.createdAt, analysis.overallScore, analysis.atsScore)
             from ResumeAnalysis analysis
             join analysis.resume resume
             where resume.user.id = :userId

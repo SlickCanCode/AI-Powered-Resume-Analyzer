@@ -7,7 +7,6 @@ import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
 import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
-import com.slickdev.resume_analyzer.reponses.ResumeIdResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
 import com.slickdev.resume_analyzer.requests.AnalysisRequest;
 import com.slickdev.resume_analyzer.requests.JobMatchRequest;
@@ -57,7 +56,7 @@ public class ResumeController {
             return new ResponseEntity<>(resumeService.analyzeJobMatch(id, request.jobLink()), HttpStatus.OK);
         }
 
-        @GetMapping
+        @GetMapping("")
     public ResponseEntity<List<ResumeResponse>> getAllResumes(@CookieValue(name = "access_token") String jwt) {
             return new ResponseEntity<>(resumeService.getAllResumes(jwt), HttpStatus.OK);
         }
@@ -75,7 +74,7 @@ public class ResumeController {
     }
 
     @GetMapping("/{id}/analyses")
-    public ResponseEntity<List<ResumeAnalysisResponse>> getResumeAnalyses(
+    public ResponseEntity<ResumeAnalysisResponse> getResumeAnalyses(
             @PathVariable String id,
             @CookieValue(name = "access_token") String jwt) {
         return ResponseEntity.ok(resumeService.getResumeAnalyses(id, jwt));

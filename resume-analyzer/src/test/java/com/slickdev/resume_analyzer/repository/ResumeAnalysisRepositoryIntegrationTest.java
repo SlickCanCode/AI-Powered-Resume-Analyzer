@@ -54,7 +54,7 @@ class ResumeAnalysisRepositoryIntegrationTest {
     private void saveAnalysis(UploadedResume resume, int overallScore, int atsScore, LocalDateTime createdAt) {
         resumeAnalysisRepository.save(ResumeAnalysis.builder()
                 .resume(resume).overallScore(overallScore).atsScore(atsScore).keywordScore(atsScore)
-                .strengths(List.of()).weaknesses(List.of()).neededSkills(List.of()).valuableSkills(List.of())
+                .strengths(List.of()).weaknesses(List.of()).existingSkills(List.of()).skillsToDevelop(List.of())
                 .grammarIssues(List.of()).recommendations(List.of()).createdAt(createdAt).build());
     }
 }
