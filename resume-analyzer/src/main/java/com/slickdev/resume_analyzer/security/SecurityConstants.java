@@ -1,11 +1,13 @@
 package com.slickdev.resume_analyzer.security;
 
+import java.time.Duration;
 import java.util.List;
 
 
 public class SecurityConstants {
     public static final String SECRET_KEY = System.getenv("SECRET_KEY"); 
-    public static final int TOKEN_EXPIRATION = 7200000; // 7200000 milliseconds = 7200 seconds = 2 hours.
+    public static final long ACCESS_TOKEN_EXPIRATION = Duration.ofMinutes(15).toMillis();
+    public static final long REFRESH_TOKEN_EXPIRATION =  Duration.ofDays(7).toMillis();
     public static final int RESET_TOKEN_EXPIRATION = 300000; // 300000 milliseconds = 300 seconds = 5 minutes.
     public static final String BEARER = "Bearer "; 
     public static final String AUTHORIZATION = "Authorization"; 

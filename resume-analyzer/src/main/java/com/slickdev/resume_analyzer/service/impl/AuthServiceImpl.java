@@ -48,16 +48,7 @@ public class AuthServiceImpl implements AuthService {
     public VerifyOtpResponse verifyOtp(String otp, String email, HttpServletResponse response, String purpose) {
         User user = userService.getUserByEmail(email);
         otpService.verifyOtp(otp, user);
-        String jwt = jwtService.generateToken(user);
-            ResponseCookie cookie = ResponseCookie.from("access_token", jwt)
-            .httpOnly(true)
-            .secure(true) // false for local HTTP
-            .path("/")
-            .sameSite("None") // or "Lax" if frontend is on the same domain
-            .maxAge(Duration.ofDays(1))
-            .build();
-
-    response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        jwtService.sendRefreshAndAccessTokens(response, user);
     String resetToken = "No reset Token needed";
 
         if (purpose != null && purpose.equals("reset-password")) {
@@ -72,4 +63,11 @@ public class AuthServiceImpl implements AuthService {
         if (!jwtService.isValid(resetToken)) throw new IllegalArgumentException("Expired reset token");
         userService.resetPassword(resetToken, newPassword);
     }
+    
+    @Override
+    public void sendAccessToken(HttpServletResponse response, String refreshToken) {
+            jwtService.validateToken(refreshToken);
+            jwtService.sendAccessToken(response, refreshToken, userService.getUser(jwtService.extractUserId(refreshToken)));
+    }
+
 }

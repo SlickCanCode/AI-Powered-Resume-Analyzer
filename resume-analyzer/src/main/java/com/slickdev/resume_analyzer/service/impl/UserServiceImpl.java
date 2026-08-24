@@ -23,6 +23,7 @@ import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
+import com.slickdev.resume_analyzer.service.AuthService;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OtpService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
@@ -70,16 +71,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public RegisterResponse registerUser(RegisterRequest user, HttpServletResponse response) {
         User savedUser = saveUser(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
-        String jwt = jwtService.generateToken(savedUser);
-            ResponseCookie cookie = ResponseCookie.from("access_token", jwt)
-            .httpOnly(true)
-            .secure(true) // false for local HTTP
-            .path("/")
-            .sameSite("None") // or "Lax" if frontend is on the same domain
-            .maxAge(Duration.ofDays(1))
-            .build();
-
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        jwtService.sendRefreshAndAccessTokens(response, savedUser);
         return new RegisterResponse(savedUser.getEmail());
     }
 
@@ -96,6 +88,10 @@ public class UserServiceImpl implements UserService{
         }
         User existingUser = getUserByEmail(user.getEmail());
          if (!existingUser.isEmailVerified()) {
+            existingUser.setFirstName(user.getFirstName());
+            existingUser.setLastName(user.getLastName());
+            existingUser.setPassword(user.getPassword());
+            userRepository.save(existingUser);
             return existingUser;
         } else {
             throw new DuplicateResourceException("Email");
@@ -114,7 +110,7 @@ public class UserServiceImpl implements UserService{
         String userId = jwtService.extractUserId(jwt);
         UUID refinedId = UUID.fromString(formatUUID(userId));
         User user = unwrapUser(userRepository.findById(refinedId), refinedId);
-        return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+        return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.isEmailVerified());
     }
 
     @Override
@@ -145,7 +141,7 @@ public class UserServiceImpl implements UserService{
         user.setEmail(request.getEmail());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
-        return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail());
+        return new UserResponseDto(user.getId(), user.getFirstName(), user.getLastName(), user.getEmail(), user.isEmailVerified());
     }
 
     @Override

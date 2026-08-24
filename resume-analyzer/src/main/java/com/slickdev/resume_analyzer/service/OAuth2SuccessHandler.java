@@ -47,18 +47,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         } catch (DuplicateResourceException e) {
             user = userService.getUserByEmail(googleuser.getAttribute("email"));
         }
-
-        String jwt = jwtService.generateToken(user);
-
-        ResponseCookie cookie = ResponseCookie.from("access_token", jwt)
-        .httpOnly(true)
-        .secure(true) // true in production
-        .path("/")
-        .maxAge(Duration.ofDays(1))
-        .sameSite("None") // or "Lax" if frontend is on the same domain 
-        .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        jwtService.sendRefreshAndAccessTokens(response, user);
         response.sendRedirect("http://localhost:3000/dashboard");
 }
 }

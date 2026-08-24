@@ -18,6 +18,9 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @AllArgsConstructor
@@ -26,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class AuthController {
     
     private final AuthService authService;
-    // In future, refactor the controllers for DRY
+    
     @PostMapping("/send-otp")
     public ResponseEntity<HttpStatus> sendOtp(@RequestBody SendOtpRequest request) {
         authService.sendOtp(request.email());
@@ -39,10 +42,17 @@ public class AuthController {
         return new ResponseEntity<>(authService.verifyOtp(request.getOtp(), request.getEmail(), response, request.getPurpose()), HttpStatus.OK);
     }
 
+    @GetMapping("/refresh")
+    public ResponseEntity<HttpStatus> getAccessToken(@CookieValue(name = "refresh_token") String jwt,  HttpServletResponse response) {
+        authService.sendAccessToken(response, jwt);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @PatchMapping("/reset-password")
     public ResponseEntity<Void> resetPassword(@CookieValue(name = "access_token") String jwt, @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(jwt, request.newPassword(), request.resetToken());
         return ResponseEntity.ok().build();
     }
+
     
 } 
