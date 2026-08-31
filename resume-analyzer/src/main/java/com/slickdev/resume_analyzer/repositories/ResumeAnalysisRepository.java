@@ -13,6 +13,7 @@ import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
 
 public interface ResumeAnalysisRepository extends JpaRepository<ResumeAnalysis, UUID> { 
     Optional<ResumeAnalysis> findFirstByResumeId(UUID resumeId);
+    void deleteFirstByResumeId(UUID resumeId);
 
     @Query("""
             select new com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse(

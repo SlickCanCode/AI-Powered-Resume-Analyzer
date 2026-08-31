@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import com.drew.lang.annotations.NotNull;
 import com.slickdev.resume_analyzer.entities.resume_analysis.AnalysisGrammerIssue;
 import com.slickdev.resume_analyzer.entities.resume_analysis.AnalysisRecommendation;
 
@@ -26,9 +25,6 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(

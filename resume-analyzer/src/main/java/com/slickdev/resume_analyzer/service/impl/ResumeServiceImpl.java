@@ -312,5 +312,17 @@ public class ResumeServiceImpl implements ResumeService{
         }
     }
 
+    @Override
+    public void deleteResume(String id, String jwt) {
+        UUID userId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));        
+        UUID refinedResumeId = UUID.fromString(formatUUID(id));
+
+        resumeRepository.deleteByIdAndUserId(refinedResumeId, userId);
+    }
+
+    @Override
+    public void deleteAnalysis(String id) {
+        resumeAnalysisRepository.deleteFirstByResumeId(UUID.fromString(formatUUID(id)));
+    }
 
 }

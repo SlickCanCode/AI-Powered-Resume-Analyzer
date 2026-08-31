@@ -1,5 +1,6 @@
 package com.slickdev.resume_analyzer;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.slickdev.resume_analyzer.exception.ErrorResponse;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
 import com.slickdev.resume_analyzer.exception.RateLimitException;
+import com.slickdev.resume_analyzer.exception.UserNotFound;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -91,15 +93,32 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<Object> handleMultipartException(MultipartException ex) {
         ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
         ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserNotFound.class)
+    public ResponseEntity<Object> handleUserNotFoundException(UserNotFound ex) {
+        ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+        @ExceptionHandler(UnknownHostException.class)
+    public ResponseEntity<Object> handleUnknownHostException(UnknownHostException ex) {
+        log.error("Network Host Unavailable", ex);
+
+        return ResponseEntity
+                .status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("Service temporarily unavailable");
     }
 
     @Override
@@ -109,6 +128,7 @@ public class ApplicationExceptionHandler extends ResponseEntityExceptionHandler 
         ErrorResponse error = new ErrorResponse(Arrays.asList(ex.getMessage()));
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
             HttpHeaders headers, HttpStatusCode status, WebRequest request) {

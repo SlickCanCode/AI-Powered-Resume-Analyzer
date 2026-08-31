@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.SubscriptionUsageResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
+import com.slickdev.resume_analyzer.requests.ChangePasswordRequest;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
 import com.slickdev.resume_analyzer.service.UserService;
@@ -47,7 +49,13 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<UserResponseDto> editUser(@CookieValue(name = "access_token") String jwt, @Valid @RequestBody UpdateuserRequest request) {
-        return  new ResponseEntity<>(userService.updateUser(jwt,request), HttpStatus.OK);
+        return new ResponseEntity<>(userService.updateUser(jwt,request), HttpStatus.OK);
+    }
+
+    @PatchMapping("/me/change-password")
+    public ResponseEntity<HttpStatus> postMethodName(@CookieValue(name = "access_token") String jwt, @RequestBody ChangePasswordRequest request) {
+        userService.changePassword(jwt,request.currentPassword(), request.newPassword());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/me")
@@ -56,7 +64,7 @@ public class UserController {
        return ResponseEntity.noContent().build();
     }   
 
-    @GetMapping("/subscription")
+    @GetMapping("/me/subscription")
     public ResponseEntity<SubscriptionUsageResponse> getSubscriptionUsage(@CookieValue(name = "access_token") String jwt) {
         return new ResponseEntity<>(userService.getSubscriptionUsage(jwt), HttpStatus.OK);
     }

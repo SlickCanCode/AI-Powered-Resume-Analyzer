@@ -18,10 +18,11 @@ public interface UserService {
     UserResponseDto getUserinfo(String jwt);
     UserResponseDto updateUser(String jwt, UpdateuserRequest  request);
     RegisterResponse registerUser(RegisterRequest user, HttpServletResponse response);
-    void resetPassword(String jwt, String newPassword);
+    void resetPassword(User user, String newPassword);
     User getUserByEmail(String email);
     void deleteUser(String jwt);
     boolean isEmailUnique(String email);
+    void changePassword(String jwt, String currentPassword, String newPassword);
     
     /**
      * Get current subscription usage information for a user.

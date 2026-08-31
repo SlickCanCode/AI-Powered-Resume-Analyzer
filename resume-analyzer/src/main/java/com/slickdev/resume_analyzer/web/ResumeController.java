@@ -19,6 +19,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,7 +46,7 @@ public class ResumeController {
     public ResponseEntity<ResumeDataResponse> uploadUserResume(@CookieValue(name = "access_token") String jwt, @RequestParam("file") MultipartFile file) {
         return new ResponseEntity<>(resumeService.parseFile(file, jwt), HttpStatus.OK);
     }
- 
+
         @PostMapping("/{id}/analyze")
     public ResponseEntity<ResumeAnalysisResponse> analyzeResume(@RequestBody AnalysisRequest request , @PathVariable String id) {
         return new ResponseEntity<>(resumeService.analyzeResume(id, request.getJobDescription()) ,HttpStatus.OK);
@@ -80,7 +81,17 @@ public class ResumeController {
         return ResponseEntity.ok(resumeService.getResumeAnalyses(id, jwt));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteResume(@PathVariable String id,  @CookieValue(name = "access_token") String jwt) {
+        resumeService.deleteResume(id, jwt);
+        return ResponseEntity.noContent().build();
+    }
 
+        @DeleteMapping("/{id}/analyses")
+    public ResponseEntity<Void> deleteResumeAnalyses(@PathVariable String id) {
+        resumeService.deleteAnalysis(id);
+        return ResponseEntity.noContent().build();
+    }
     
 
 }

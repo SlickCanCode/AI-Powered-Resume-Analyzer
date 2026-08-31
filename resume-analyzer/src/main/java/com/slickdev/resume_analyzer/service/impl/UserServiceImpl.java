@@ -1,14 +1,11 @@
 package com.slickdev.resume_analyzer.service.impl;
 
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,13 +14,13 @@ import com.slickdev.resume_analyzer.entities.Subscription;
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
+import com.slickdev.resume_analyzer.exception.UserNotFound;
 import com.slickdev.resume_analyzer.reponses.RegisterResponse;
 import com.slickdev.resume_analyzer.reponses.SubscriptionUsageResponse;
 import com.slickdev.resume_analyzer.reponses.UserResponseDto;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.RegisterRequest;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
-import com.slickdev.resume_analyzer.service.AuthService;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OtpService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
@@ -66,7 +63,6 @@ public class UserServiceImpl implements UserService{
     public void setSubscriptionService(SubscriptionService subscriptionService) {
         this.subscriptionService = subscriptionService;
     }
-
 
     @Override
     public RegisterResponse registerUser(RegisterRequest user, HttpServletResponse response) {
@@ -145,9 +141,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void resetPassword(String jwt, String newPassword) {
-        String id = jwtService.extractUserId(jwt);
-        User user = getUser(id);
+    public void resetPassword(User user, String newPassword) {
         if (!passwordEncoder.matches(newPassword, user.getPassword())) {
             user.setPassword(passwordEncoder.encode(newPassword));
         } else {
@@ -155,10 +149,21 @@ public class UserServiceImpl implements UserService{
         }
     }
 
+    @Override
+    public void changePassword(String jwt, String currentPassword, String newPassword) {
+        User user = getUser(jwtService.extractUserId(jwt));
+        //check if the currentPassword is actually correct before changing it
+        if (passwordEncoder.matches(currentPassword, user.getPassword())) {
+            resetPassword(user, newPassword);
+        } else {
+            throw new IllegalArgumentException("Incorrect Password");
+        }
+    }
+
     static User unwrapUser(Optional<User> entity, UUID id) {
         if (entity.isPresent()) return entity.get();
-        else throw new EntityNotFoundException(id, User.class);
-    }
+        else throw new UserNotFound(id.toString());
+    } 
 
     @Override
     public boolean isEmailUnique(String email) {

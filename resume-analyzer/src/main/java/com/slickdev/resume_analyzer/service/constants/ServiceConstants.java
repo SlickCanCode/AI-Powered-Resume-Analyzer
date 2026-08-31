@@ -4,8 +4,6 @@ package com.slickdev.resume_analyzer.service.constants;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.genai.types.Schema;
 
 public class ServiceConstants {

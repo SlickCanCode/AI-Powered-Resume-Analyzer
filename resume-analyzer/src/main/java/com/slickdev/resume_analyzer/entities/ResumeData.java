@@ -11,7 +11,6 @@ import com.slickdev.resume_analyzer.entities.resume_data.ResumeExperience;
 import com.slickdev.resume_analyzer.entities.resume_data.ResumeOnlineProfile;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Entity

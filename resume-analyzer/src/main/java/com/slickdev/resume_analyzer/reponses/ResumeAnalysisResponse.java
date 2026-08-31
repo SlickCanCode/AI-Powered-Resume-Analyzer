@@ -1,14 +1,12 @@
 package com.slickdev.resume_analyzer.reponses;
 
 import java.util.List;
-import java.util.Map;
 
 
 import com.slickdev.resume_analyzer.entities.resume_analysis.AnalysisGrammerIssue;
 import com.slickdev.resume_analyzer.entities.resume_analysis.AnalysisRecommendation;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 
 
 
@@ -28,7 +26,7 @@ public class ResumeAnalysisResponse {
     private List<String> weaknesses;
     
     private List<String> existingSkills;
-    private List<String> skillToDevelop;
+    private List<String> skillsToDevelop;
 
     private List<AnalysisGrammerIssue> grammarIssues;
     private List<AnalysisRecommendation> recommendations;

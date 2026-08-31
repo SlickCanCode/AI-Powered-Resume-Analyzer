@@ -23,4 +23,6 @@ public interface ResumeService {
     ResumeDataResponse getResumeData(String resumeId, String jwt);
     ResumeAnalysisResponse getResumeAnalyses(String resumeId, String jwt);
     List<AnalysisSummaryResponse> getAllAnalyses(String jwt);
+    void deleteResume(String id, String jwt);
+    void deleteAnalysis(String id);
 }

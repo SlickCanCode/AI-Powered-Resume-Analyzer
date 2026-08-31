@@ -1,10 +1,7 @@
 package com.slickdev.resume_analyzer.service.impl;
 
-import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
 import com.slickdev.resume_analyzer.entities.User;
@@ -59,9 +56,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void resetPassword(String jwt, String newPassword, String resetToken) {
-        if (!jwtService.extractUserId(resetToken).equals(jwtService.extractUserId(jwt))) throw new IllegalArgumentException("Invalid token");
+        String userId = jwtService.extractUserId(jwt);
+        if (!jwtService.extractUserId(resetToken).equals(userId)) throw new IllegalArgumentException("Invalid token");
         if (!jwtService.isValid(resetToken)) throw new IllegalArgumentException("Expired reset token");
-        userService.resetPassword(resetToken, newPassword);
+
+        userService.resetPassword(userService.getUser(userId), newPassword);
     }
     
     @Override

@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;

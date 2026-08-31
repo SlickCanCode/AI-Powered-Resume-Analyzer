@@ -2,7 +2,6 @@ package com.slickdev.resume_analyzer.service;
 
 
 
-import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.reponses.VerifyOtpResponse;
 
 import jakarta.servlet.http.HttpServletResponse;

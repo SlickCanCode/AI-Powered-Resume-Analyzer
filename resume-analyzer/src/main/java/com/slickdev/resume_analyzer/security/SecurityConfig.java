@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,39 +43,90 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JWTAuthorizationFilter jwtAuthorizationFilter;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter(authentication, userService, jwtService);
-        authenticationFilter.setFilterProcessesUrl("/api/v1/auth/login");
+@Bean
+@Order(1)
+public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        http
+    AuthenticationFilter authenticationFilter =
+            new AuthenticationFilter(authentication, userService, jwtService);
+
+    authenticationFilter.setFilterProcessesUrl("/api/v1/auth/login");
+
+    http
+        .securityMatcher("/api/**")
+
         .cors(Customizer.withDefaults())
         .csrf(csrf -> csrf.disable())
+
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/h2-console/**").permitAll()
             .requestMatchers("/api/v1/auth/**").permitAll()
             .requestMatchers(HttpMethod.POST, SecurityConstants.REGISTER_PATH).permitAll()
             .anyRequest().authenticated()
         )
+
         .exceptionHandling(exception -> exception
             .defaultAuthenticationEntryPointFor(
-                 (request, response, authException) ->
+                (request, response, authException) ->
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED),
                 new AntPathRequestMatcher("/api/**")
             )
         )
-        .oauth2Login(oauth -> oauth.successHandler(oAuth2SuccessHandler))
-        .addFilterBefore(new ExceptionHandlerFilter(), AuthenticationFilter.class)
-        .addFilter(authenticationFilter)
-        .addFilterAfter(jwtAuthorizationFilter, AuthenticationFilter.class)
-        .headers(headers -> headers.frameOptions(frameOption -> frameOption.sameOrigin()))
+
+        // API has no session authentication
         .sessionManagement(session ->
-            session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+            session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+
+        .addFilterBefore(
+            new ExceptionHandlerFilter(),
+            AuthenticationFilter.class
+        )
+        .addFilter(authenticationFilter)
+        .addFilterAfter(
+            jwtAuthorizationFilter,
+            AuthenticationFilter.class
+        )
+
+        .headers(headers ->
+            headers.frameOptions(frame ->
+                frame.sameOrigin()
+            )
         );
 
     return http.build();
-       
-    }
+}
+
+@Bean
+@Order(2)
+public SecurityFilterChain oauthSecurityFilterChain(HttpSecurity http) throws Exception {
+
+    http
+        .cors(Customizer.withDefaults())
+
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/h2-console/**").permitAll()
+            .requestMatchers("/oauth2/**").permitAll()
+            .requestMatchers("/login/**").permitAll()
+            .anyRequest().permitAll()
+        )
+
+        .oauth2Login(oauth ->
+            oauth.successHandler(oAuth2SuccessHandler)
+        )
+
+        // OAuth2 is allowed to use a session
+        .sessionManagement(session ->
+            session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+        )
+
+        .headers(headers ->
+            headers.frameOptions(frame ->
+                frame.sameOrigin()
+            )
+        );
+
+    return http.build();
+}
 
      @Bean
     public CorsConfigurationSource corsConfigurationSource() {
