@@ -27,9 +27,10 @@ import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
 
-
+@Slf4j
 @Service
 @Transactional
 public class UserServiceImpl implements UserService{
@@ -68,6 +69,7 @@ public class UserServiceImpl implements UserService{
     public RegisterResponse registerUser(RegisterRequest user, HttpServletResponse response) {
         User savedUser = saveUser(new User(user.getFirstName(), user.getLastName(), user.getEmail(), user.getPassword()));
         jwtService.sendRefreshAndAccessTokens(response, savedUser);
+        log.info("User created. Name: {} ",savedUser.getFirstName());
         return new RegisterResponse(savedUser.getEmail());
     }
 
@@ -81,15 +83,7 @@ public class UserServiceImpl implements UserService{
             // Create default subscription for new user
             subscriptionService.createDefaultSubscription(savedUser);
             return savedUser;
-        }
-        User existingUser = getUserByEmail(user.getEmail());
-         if (!existingUser.isEmailVerified()) {
-            existingUser.setFirstName(user.getFirstName());
-            existingUser.setLastName(user.getLastName());
-            existingUser.setPassword(user.getPassword());
-            userRepository.save(existingUser);
-            return existingUser;
-        } else {
+        }else {
             throw new DuplicateResourceException("Email");
         }
     } 

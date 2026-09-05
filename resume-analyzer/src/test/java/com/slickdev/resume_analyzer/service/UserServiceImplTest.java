@@ -18,9 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
-import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
+import com.slickdev.resume_analyzer.exception.UserNotFound;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
+import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +33,7 @@ class UserServiceImplTest {
     @Mock private BCryptPasswordEncoder passwordEncoder;
     @Mock private JwtService jwtService;
     @Mock private OtpService otpService;
+    @Mock private SubscriptionService subscriptionService;
     @InjectMocks private UserServiceImpl userService;
 
     private User user;
@@ -51,6 +53,7 @@ class UserServiceImplTest {
         assertEquals(user, userService.saveUser(user));
         assertEquals("encoded", user.getPassword());
         verify(userRepository).save(user);
+        verify(subscriptionService).createDefaultSubscription(user);
     }
 
     @Test
@@ -104,6 +107,6 @@ class UserServiceImplTest {
     void getUserThrowsNotFoundForUnknownId() {
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> userService.getUser(USER_ID.toString()));
+        assertThrows(UserNotFound.class, () -> userService.getUser(USER_ID.toString()));
     }
 }

@@ -12,4 +12,5 @@ public interface AuthService {
     public VerifyOtpResponse verifyOtp(String otp, String email, HttpServletResponse response, String purpose);
     public void resetPassword(String jwt, String newPassword, String resetToken);
     public void sendAccessToken(HttpServletResponse response, String refreshToken);
+    public void logOutUser(HttpServletResponse response);
 }

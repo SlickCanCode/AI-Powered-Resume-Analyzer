@@ -17,15 +17,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeAnalysisRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeDataRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
-import com.slickdev.resume_analyzer.service.impl.GeminiService;
+import com.slickdev.resume_analyzer.service.ai.GeminiService;
 import com.slickdev.resume_analyzer.service.impl.JobPostingExtractor;
 import com.slickdev.resume_analyzer.service.impl.JwtServiceImpl;
 import com.slickdev.resume_analyzer.service.impl.ResumeServiceImpl;
@@ -74,13 +76,27 @@ class ResumeServiceImplTest {
         assertThrows(EntityNotFoundException.class, () -> resumeService.getResumeData(RESUME_ID.toString(), JWT));
     }
 
-    // @Test
-    // void getResumeAnalysesRejectsAnUnownedResumeBeforeReadingAnalyses() {
-    //     when(resumeRepository.existsByIdAndUserId(RESUME_ID, USER_ID)).thenReturn(false);
+    @Test
+    void getResumeAnalysesReturnsAnalysesInfo() {
+        UploadedResume resume = UploadedResume.builder().id(RESUME_ID).build();
+        ResumeAnalysis analysis = ResumeAnalysis.builder()
+                .id(UUID.randomUUID()).resume(resume).overallScore(90).atsScore(88).keywordScore(87).strengths(List.of("Java")).weaknesses(List.of()).existingSkills(List.of())
+                 .skillsToDevelop(List.of("Spring")).grammarIssues(List.of()).recommendations(List.of()).build();
+        when(resumeAnalysisRepository.findFirstByResumeIdAndResumeUserId(RESUME_ID, USER_ID)).thenReturn(Optional.of(analysis));
 
-    //     assertThrows(EntityNotFoundException.class, () -> resumeService.getResumeAnalyses(RESUME_ID.toString(), JWT));
-    //     verify(resumeAnalysisRepository, org.mockito.Mockito.never()).findByResumeIdAndResumeUserIdOrderByCreatedAtDesc(RESUME_ID, USER_ID);
-    // }
+        ResumeAnalysisResponse response = resumeService.getResumeAnalyses(RESUME_ID.toString(), JWT);
+
+        assertEquals(88, response.getAtsScore());
+        assertEquals(90, response.getOverallScore());
+        assertEquals(87, response.getKeywordScore());
+    }
+
+    @Test
+    void getResumeAnalysesDoesNotExposeAnotherUsersResumesAnalysis() {
+        when(resumeAnalysisRepository.findFirstByResumeIdAndResumeUserId(RESUME_ID, USER_ID)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> resumeService.getResumeAnalyses(RESUME_ID.toString(), JWT));
+    }
 
     @Test
     void getAllAnalysesUsesSummaryProjectionForTheAuthenticatedUser() {

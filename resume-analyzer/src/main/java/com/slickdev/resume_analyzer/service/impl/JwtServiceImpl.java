@@ -22,7 +22,7 @@ public class JwtServiceImpl implements JwtService{
 
     private final Algorithm algorithm;
     public JwtServiceImpl() {
-        this.algorithm = Algorithm.HMAC512(SecurityConstants.SECRET_KEY);
+        this.algorithm = Algorithm.HMAC512(SecurityConstants.JWT_SECRET);
     }
 
     /** Generate a JWT for a user */

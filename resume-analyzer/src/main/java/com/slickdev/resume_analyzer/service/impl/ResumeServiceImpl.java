@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
+import com.drew.lang.annotations.NotNull;
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
@@ -37,10 +38,16 @@ import com.slickdev.resume_analyzer.repositories.ResumeDataRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
+import com.slickdev.resume_analyzer.service.ai.AiModelRouter;
+import com.slickdev.resume_analyzer.service.ai.GeminiService;
+import com.slickdev.resume_analyzer.service.ai.OpenAiService;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Transactional
@@ -48,7 +55,8 @@ public class ResumeServiceImpl implements ResumeService{
 
 
     private final ResumeRepository resumeRepository;
-    private final GeminiService geminiService;
+    private final AiModelRouter aiModelRouter;
+    private final OpenAiService openAiService;
     private final UserServiceImpl userService;
     private final JwtServiceImpl jwtService;
     private final ResumeDataRepository resumeDataRepository;
@@ -172,7 +180,7 @@ public class ResumeServiceImpl implements ResumeService{
 
             String fileName =file.getOriginalFilename();
             String parsedContent = handler.toString();
-            ResumeData resumeData = geminiService.parseResume(parsedContent);
+            ResumeData resumeData = openAiService.parseResume(parsedContent);
 
             UploadedResume resume = resumeRepository.save(UploadedResume.builder()
             .filename(fileName)
@@ -197,6 +205,7 @@ public class ResumeServiceImpl implements ResumeService{
                 .build();
 
         }catch (IOException | TikaException | SAXException e) {
+            log.error("Resume parsing failed for {} because {}", user.getFirstName(), e.getMessage());
             throw new FileProcessingException("Unable to parse file:" + e.getMessage());
         }
     }
@@ -212,11 +221,11 @@ public class ResumeServiceImpl implements ResumeService{
     }
 
     //This returns the first resume Analysis for now because i believe no resume should have more than one normal analyses unless the resume was edited.
-
     @Override
     public ResumeAnalysisResponse getResumeAnalyses(String resumeId, String jwt) {
+        UUID userId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));
         UUID refinedResumeId = UUID.fromString(formatUUID(resumeId));
-        ResumeAnalysis analysis = unwrap(resumeAnalysisRepository.findFirstByResumeId(refinedResumeId), null, ResumeAnalysis.class);
+        ResumeAnalysis analysis = unwrap(resumeAnalysisRepository.findFirstByResumeIdAndResumeUserId(refinedResumeId, userId), null, ResumeAnalysis.class);
         return new ResumeAnalysisResponse(analysis.getId().toString(), resumeId, analysis.getOverallScore(),
          analysis.getAtsScore(), analysis.getKeywordScore(), analysis.getStrengths(), analysis.getWeaknesses(),
           analysis.getExistingSkills(), analysis.getSkillsToDevelop(), analysis.getGrammarIssues(), analysis.getRecommendations());
@@ -261,6 +270,11 @@ public class ResumeServiceImpl implements ResumeService{
 
     @Override
     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
+        //check if job description is not a link
+        if (jobDescription.startsWith("http")) {
+            throw new IllegalArgumentException("Please provide a job description text instead of a link. Use the analyzeJobMatch method for job links.");
+        }
+
         UploadedResume resume = findById(id);
         String userId = resume.getUser().getId().toString();
         
@@ -272,7 +286,7 @@ public class ResumeServiceImpl implements ResumeService{
         }
         
         String resumeContent = resume.getParsedContent();
-        ResumeAnalysis analysis = geminiService.analyzeResume(resumeContent, jobDescription);
+        ResumeAnalysis analysis = aiModelRouter.analyzeResume(resumeContent, jobDescription);
         
         // Increment subscription usage
         subscriptionService.incrementAnalysisUsage(userId);
@@ -282,6 +296,7 @@ public class ResumeServiceImpl implements ResumeService{
         resume.increaseAnalysisCount();
         resume.setLatestScore(analysis.getOverallScore());
         resumeAnalysisRepository.save(analysis);
+        log.info("analysis complete for user named {}", resume.getUser().getFirstName());
 
         return toResumeAnalysisResponse(analysis, resume.getId().toString());
 
@@ -299,12 +314,13 @@ public class ResumeServiceImpl implements ResumeService{
         }
 
         try {
-            JobMatchResponse response = geminiService.analyzeJobMatch(resume.getParsedContent(), jobPostingExtractor.extract(jobLink));
+            JobMatchResponse response = aiModelRouter.analyzeJobMatch(resume.getParsedContent(), jobPostingExtractor.extract(jobLink));
             subscriptionService.incrementAnalysisUsage(userId);  
             resume.increaseAnalysisCount();        
             return response;
         } catch (JobPostingExtractor.JobPageUnavailableException exception) {
-            JobMatchResponse response = geminiService.analyzeJobMatch(
+            log.info("Could not parse the job url: {}", jobLink);
+            JobMatchResponse response = aiModelRouter.analyzeJobMatch(
                     resume.getParsedContent(),
                     "Job URL: " + jobLink + "\nRetrieve this job posting and extract its requirements before matching it to the resume.");
             resume.increaseAnalysisCount();

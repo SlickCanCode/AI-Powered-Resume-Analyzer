@@ -5,7 +5,7 @@ import java.util.List;
 
 
 public class SecurityConstants {
-    public static final String SECRET_KEY = System.getenv("SECRET_KEY"); 
+    public static final String JWT_SECRET = System.getenv("JWT_SECRET"); 
     public static final long ACCESS_TOKEN_EXPIRATION = Duration.ofMinutes(15).toMillis();
     public static final long REFRESH_TOKEN_EXPIRATION =  Duration.ofDays(7).toMillis();
     public static final int RESET_TOKEN_EXPIRATION = 300000; // 300000 milliseconds = 300 seconds = 5 minutes.

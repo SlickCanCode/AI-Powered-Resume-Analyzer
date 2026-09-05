@@ -1,0 +1,147 @@
+00:31:49.294 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.slickdev.resume_analyzer.integration.ApiWorkflowIntegrationTest]: ApiWorkflowIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+00:31:49.691 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.slickdev.resume_analyzer.ResumeAnalyzerApplication for test class com.slickdev.resume_analyzer.integration.ApiWorkflowIntegrationTest
+00:31:50.251 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2026-09-02T00:31:51.489+01:00  WARN 31636 --- [           main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/HP/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/HP/.m2/repository/org/json/json/20250517/json-20250517.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2026-09-02T00:31:51.565+01:00  INFO 31636 --- [           main] c.s.r.i.ApiWorkflowIntegrationTest       : Starting ApiWorkflowIntegrationTest using Java 17.0.13 with PID 31636 (started by HP in C:\Users\HP\Documents\DEV PROJECTS\ResuMatch\ResuMatch Back-end\resume-analyzer)
+2026-09-02T00:31:51.570+01:00  INFO 31636 --- [           main] c.s.r.i.ApiWorkflowIntegrationTest       : The following 1 profile is active: "dev"
+2026-09-02T00:31:54.957+01:00  INFO 31636 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-02T00:31:55.338+01:00  INFO 31636 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 341 ms. Found 7 JPA repository interfaces.
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+2026-09-02T00:32:02.133+01:00  INFO 31636 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-09-02T00:32:03.003+01:00  INFO 31636 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-09-02T00:32:03.012+01:00  INFO 31636 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-09-02T00:32:03.289+01:00  INFO 31636 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:testdb (H2 2.3)
+2026-09-02T00:32:03.318+01:00  WARN 31636 --- [           main] o.f.c.internal.database.base.Database    : Flyway upgrade recommended: H2 2.3.232 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.2.224.
+2026-09-02T00:32:03.453+01:00  INFO 31636 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "PUBLIC"."flyway_schema_history" does not exist yet
+2026-09-02T00:32:03.462+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 8 migrations (execution time 00:00.087s)
+2026-09-02T00:32:03.500+01:00  INFO 31636 --- [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "PUBLIC"."flyway_schema_history" ...
+2026-09-02T00:32:03.710+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": << Empty Schema >>
+2026-09-02T00:32:03.759+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "1 - create users table"
+2026-09-02T00:32:03.835+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "2 - create resumes table"
+2026-09-02T00:32:03.879+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "3 - create verification token table"
+2026-09-02T00:32:03.915+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "4 - create resume analysis table"
+2026-09-02T00:32:03.962+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "5 - create enums"
+2026-09-02T00:32:04.008+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "6 - create subscription table"
+2026-09-02T00:32:04.038+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "7 - create subscription usage table"
+2026-09-02T00:32:04.067+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "PUBLIC" to version "8 - create resume data table"
+2026-09-02T00:32:04.126+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 8 migrations to schema "PUBLIC", now at version v8 (execution time 00:00.121s)
+2026-09-02T00:32:04.710+01:00  INFO 31636 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-02T00:32:05.225+01:00  INFO 31636 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2026-09-02T00:32:05.539+01:00  INFO 31636 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-09-02T00:32:06.463+01:00  INFO 31636 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-02T00:32:06.785+01:00  WARN 31636 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-02T00:32:06.880+01:00  INFO 31636 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-02T00:32:11.882+01:00  INFO 31636 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-02T00:32:12.042+01:00  INFO 31636 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-02T00:32:14.235+01:00  INFO 31636 --- [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-09-02T00:32:18.913+01:00  WARN 31636 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-02T00:32:21.716+01:00  INFO 31636 --- [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2026-09-02T00:32:22.013+01:00  INFO 31636 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-02T00:32:22.014+01:00  INFO 31636 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-02T00:32:22.019+01:00  INFO 31636 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 4 ms
+2026-09-02T00:32:22.112+01:00  INFO 31636 --- [           main] c.s.r.i.ApiWorkflowIntegrationTest       : Started ApiWorkflowIntegrationTest in 31.918 seconds (process running for 34.963)
+2026-09-02T00:32:24.129+01:00  WARN 31636 --- [           main] o.s.w.s.h.HandlerMappingIntrospector     : Cache miss for REQUEST dispatch to '/api/v1/auth/send-otp' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-09-02T00:32:30.495+01:00  INFO 31636 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.slickdev.resume_analyzer.repository.ResumeAnalysisRepositoryIntegrationTest]: ResumeAnalysisRepositoryIntegrationTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-02T00:32:30.552+01:00  INFO 31636 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.slickdev.resume_analyzer.ResumeAnalyzerApplication for test class com.slickdev.resume_analyzer.repository.ResumeAnalysisRepositoryIntegrationTest
+2026-09-02T00:32:30.565+01:00  INFO 31636 --- [           main] o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2026-09-02T00:32:30.673+01:00  WARN 31636 --- [           main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/HP/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/HP/.m2/repository/org/json/json/20250517/json-20250517.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2026-09-02T00:32:30.675+01:00  INFO 31636 --- [           main] .ResumeAnalysisRepositoryIntegrationTest : Starting ResumeAnalysisRepositoryIntegrationTest using Java 17.0.13 with PID 31636 (started by HP in C:\Users\HP\Documents\DEV PROJECTS\ResuMatch\ResuMatch Back-end\resume-analyzer)
+2026-09-02T00:32:30.675+01:00  INFO 31636 --- [           main] .ResumeAnalysisRepositoryIntegrationTest : The following 1 profile is active: "dev"
+2026-09-02T00:32:31.525+01:00  INFO 31636 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-09-02T00:32:31.668+01:00  INFO 31636 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 138 ms. Found 7 JPA repository interfaces.
+2026-09-02T00:32:31.974+01:00  INFO 31636 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-09-02T00:32:31.977+01:00  INFO 31636 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection conn10: url=jdbc:h2:mem:testdb user=SA
+2026-09-02T00:32:31.978+01:00  INFO 31636 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-09-02T00:32:31.981+01:00  INFO 31636 --- [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:h2:mem:testdb (H2 2.3)
+2026-09-02T00:32:31.986+01:00  WARN 31636 --- [           main] o.f.c.internal.database.base.Database    : Flyway upgrade recommended: H2 2.3.232 is newer than this version of Flyway and support has not been tested. The latest supported version of H2 is 2.2.224.
+2026-09-02T00:32:32.024+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbValidate     : Successfully validated 8 migrations (execution time 00:00.034s)
+2026-09-02T00:32:32.032+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "PUBLIC": 8
+2026-09-02T00:32:32.034+01:00  INFO 31636 --- [           main] o.f.core.internal.command.DbMigrate      : Schema "PUBLIC" is up to date. No migration necessary.
+2026-09-02T00:32:32.132+01:00  INFO 31636 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-09-02T00:32:32.147+01:00  INFO 31636 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-09-02T00:32:32.183+01:00  INFO 31636 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-09-02T00:32:32.187+01:00  WARN 31636 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-09-02T00:32:32.189+01:00  INFO 31636 --- [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-09-02T00:32:32.767+01:00  INFO 31636 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-09-02T00:32:32.788+01:00  INFO 31636 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-09-02T00:32:33.243+01:00  WARN 31636 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-09-02T00:32:33.608+01:00  INFO 31636 --- [           main] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2026-09-02T00:32:33.674+01:00  INFO 31636 --- [           main] .ResumeAnalysisRepositoryIntegrationTest : Started ResumeAnalysisRepositoryIntegrationTest in 3.111 seconds (process running for 46.525)
+2026-09-02T00:32:36.225+01:00  INFO 31636 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.slickdev.resume_analyzer.web.ResumeControllerTest]: ResumeControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-02T00:32:36.318+01:00  INFO 31636 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.slickdev.resume_analyzer.ResumeAnalyzerApplication for test class com.slickdev.resume_analyzer.web.ResumeControllerTest
+2026-09-02T00:32:36.326+01:00  INFO 31636 --- [           main] o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2026-09-02T00:32:36.424+01:00  WARN 31636 --- [           main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/HP/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/HP/.m2/repository/org/json/json/20250517/json-20250517.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2026-09-02T00:32:36.430+01:00  INFO 31636 --- [           main] c.s.r.web.ResumeControllerTest           : Starting ResumeControllerTest using Java 17.0.13 with PID 31636 (started by HP in C:\Users\HP\Documents\DEV PROJECTS\ResuMatch\ResuMatch Back-end\resume-analyzer)
+2026-09-02T00:32:36.432+01:00  INFO 31636 --- [           main] c.s.r.web.ResumeControllerTest           : The following 1 profile is active: "dev"
+2026-09-02T00:32:37.759+01:00  INFO 31636 --- [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-02T00:32:37.759+01:00  INFO 31636 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-02T00:32:37.761+01:00  INFO 31636 --- [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+2026-09-02T00:32:37.773+01:00  INFO 31636 --- [           main] c.s.r.web.ResumeControllerTest           : Started ResumeControllerTest in 1.449 seconds (process running for 50.625)

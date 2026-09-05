@@ -7,13 +7,11 @@ import java.util.Map;
 import com.google.genai.types.Schema;
 
 public class ServiceConstants {
-    public static final String API_KEY = System.getenv("GEMINI_API_KEY");
     public static final String RESEND_API_KEY = "" + System.getenv("RESEND_API_KEY");
     // public static final String RESUMATCH_EMAIL = System.getenv("RESUMATCH_EMAIL");
     public static final String EMAIL_OTP_SUBJECT = "Verify your email address";
     public static final String EMAIL_OTP_BODY = "<p>Your OTP verification code is</p><br><strong>%s</strong><p>It will expire in 5 minutes.</p>";
-    public static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + API_KEY;
-        public static final Schema PARSING_SCHEMA = Schema.builder()
+    public static final Schema PARSING_SCHEMA = Schema.builder()
             .type("OBJECT")
             .properties(Map.of(
                 "fullName", Schema.builder().type("STRING").build(),
