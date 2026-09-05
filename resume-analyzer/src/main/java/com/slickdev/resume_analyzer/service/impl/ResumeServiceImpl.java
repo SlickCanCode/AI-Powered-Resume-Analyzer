@@ -56,7 +56,6 @@ public class ResumeServiceImpl implements ResumeService{
 
     private final ResumeRepository resumeRepository;
     private final AiModelRouter aiModelRouter;
-    private final OpenAiService openAiService;
     private final UserServiceImpl userService;
     private final JwtServiceImpl jwtService;
     private final ResumeDataRepository resumeDataRepository;
@@ -180,7 +179,7 @@ public class ResumeServiceImpl implements ResumeService{
 
             String fileName =file.getOriginalFilename();
             String parsedContent = handler.toString();
-            ResumeData resumeData = openAiService.parseResume(parsedContent);
+            ResumeData resumeData = aiModelRouter.parseResume(parsedContent);
 
             UploadedResume resume = resumeRepository.save(UploadedResume.builder()
             .filename(fileName)
