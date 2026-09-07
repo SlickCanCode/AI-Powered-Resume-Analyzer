@@ -9,6 +9,8 @@ import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.exception.GeminiQuotaException;
 import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
 import com.slickdev.resume_analyzer.service.AiService;
+import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiAvailability;
+import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiService;
 
 @Component
 public class AiModelRouter {
@@ -59,7 +61,7 @@ public class AiModelRouter {
 
     private <T> T execute(Function<AiService, T> operation) {
 
-        if (!geminiAvailability.isAvailable()) {
+        if (geminiAvailability.areAllModelsUnavailable()) {
             return operation.apply(openAiService);
         }
 
@@ -67,10 +69,6 @@ public class AiModelRouter {
             return operation.apply(geminiService);
 
         } catch (GeminiQuotaException e) {
-
-            geminiAvailability.markUnavailable(
-                    e.getRetryAt()
-            );
 
             return operation.apply(openAiService);
         }

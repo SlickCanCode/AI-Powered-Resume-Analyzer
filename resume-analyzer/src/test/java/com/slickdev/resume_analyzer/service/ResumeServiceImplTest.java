@@ -21,13 +21,13 @@ import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
-import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeAnalysisRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeDataRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
-import com.slickdev.resume_analyzer.service.ai.GeminiService;
+import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiService;
 import com.slickdev.resume_analyzer.service.impl.JobPostingExtractor;
 import com.slickdev.resume_analyzer.service.impl.JwtServiceImpl;
 import com.slickdev.resume_analyzer.service.impl.ResumeServiceImpl;
@@ -100,7 +100,7 @@ class ResumeServiceImplTest {
 
     @Test
     void getAllAnalysesUsesSummaryProjectionForTheAuthenticatedUser() {
-        AnalysisSummaryResponse summary = new AnalysisSummaryResponse(RESUME_ID,"resume.pdf", LocalDateTime.now(), 82, 79);
+        AnalysisPreviewResponse summary = new AnalysisPreviewResponse("87654321-1234-1234-1234-1234567890ab", RESUME_ID.toString(),"resume.pdf", 82, 79, LocalDateTime.now().toString());
         when(resumeAnalysisRepository.findAllSummariesByUserId(USER_ID)).thenReturn(List.of(summary));
 
         assertEquals(List.of(summary), resumeService.getAllAnalyses(JWT));

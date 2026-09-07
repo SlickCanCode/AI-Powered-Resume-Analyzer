@@ -18,7 +18,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.slickdev.resume_analyzer.security.filters.AuthenticationFilter;
 import com.slickdev.resume_analyzer.security.filters.ExceptionHandlerFilter;
-import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
+import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationProvider;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OAuth2SuccessHandler;
 import com.slickdev.resume_analyzer.service.UserService;
@@ -37,7 +37,7 @@ import lombok.AllArgsConstructor;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CustomAuthenticationManager authentication;
+    private final CustomAuthenticationProvider authentication;
     private final UserService  userService;
     private final JwtService  jwtService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;

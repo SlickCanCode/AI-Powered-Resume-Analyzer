@@ -55,7 +55,7 @@ import com.slickdev.resume_analyzer.repositories.ResumeDataRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.repositories.VerificationTokenRepository;
-import com.slickdev.resume_analyzer.service.ai.GeminiService;
+import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiService;
 import com.slickdev.resume_analyzer.service.impl.JwtServiceImpl;
 import com.slickdev.resume_analyzer.service.impl.OtpServiceImpl;
 

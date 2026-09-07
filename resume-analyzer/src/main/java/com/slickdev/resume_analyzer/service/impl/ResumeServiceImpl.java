@@ -30,7 +30,7 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.EntityNotFoundException;
 import com.slickdev.resume_analyzer.exception.FileProcessingException;
 import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
-import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
@@ -39,8 +39,8 @@ import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.ai.AiModelRouter;
-import com.slickdev.resume_analyzer.service.ai.GeminiService;
 import com.slickdev.resume_analyzer.service.ai.OpenAiService;
+import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiService;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
@@ -232,7 +232,7 @@ public class ResumeServiceImpl implements ResumeService{
     }
 
     @Override
-    public List<AnalysisSummaryResponse> getAllAnalyses(String jwt) {
+    public List<AnalysisPreviewResponse> getAllAnalyses(String jwt) {
         UUID userId = UUID.fromString(formatUUID(jwtService.extractUserId(jwt)));
         return resumeAnalysisRepository.findAllSummariesByUserId(userId);
     }
@@ -271,7 +271,7 @@ public class ResumeServiceImpl implements ResumeService{
     public ResumeAnalysisResponse analyzeResume(String id, String jobDescription) {
         //check if job description is not a link
         if (jobDescription.startsWith("http")) {
-            throw new IllegalArgumentException("Please provide a job description text instead of a link. Use the analyzeJobMatch method for job links.");
+            throw new IllegalArgumentException("Please provide a job description text instead of a link. Use the analyzeJobMatch feature for job links.");
         }
 
         UploadedResume resume = findById(id);
@@ -315,7 +315,9 @@ public class ResumeServiceImpl implements ResumeService{
         try {
             JobMatchResponse response = aiModelRouter.analyzeJobMatch(resume.getParsedContent(), jobPostingExtractor.extract(jobLink));
             subscriptionService.incrementAnalysisUsage(userId);  
-            resume.increaseAnalysisCount();        
+            resume.increaseAnalysisCount();    
+            // Increment subscription usage
+            subscriptionService.incrementAnalysisUsage(userId);    
             return response;
         } catch (JobPostingExtractor.JobPageUnavailableException exception) {
             log.info("Could not parse the job url: {}", jobLink);
@@ -323,6 +325,8 @@ public class ResumeServiceImpl implements ResumeService{
                     resume.getParsedContent(),
                     "Job URL: " + jobLink + "\nRetrieve this job posting and extract its requirements before matching it to the resume.");
             resume.increaseAnalysisCount();
+            // Increment subscription usage
+            subscriptionService.incrementAnalysisUsage(userId);
             return response;
         }
     }

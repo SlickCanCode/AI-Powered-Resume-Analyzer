@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
-import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeResponse;
@@ -63,7 +63,7 @@ public class ResumeController {
         }
 
     @GetMapping("/analyses")
-    public ResponseEntity<List<AnalysisSummaryResponse>> getAllAnalyses(@CookieValue(name = "access_token") String jwt) {
+    public ResponseEntity<List<AnalysisPreviewResponse>> getAllAnalyses(@CookieValue(name = "access_token") String jwt) {
         return ResponseEntity.ok(resumeService.getAllAnalyses(jwt));
     }
 

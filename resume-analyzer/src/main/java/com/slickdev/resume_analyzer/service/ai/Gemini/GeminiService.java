@@ -1,5 +1,6 @@
-package com.slickdev.resume_analyzer.service.ai;
+package com.slickdev.resume_analyzer.service.ai.Gemini;
 
+import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiAvailability;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -12,6 +13,8 @@ import com.google.genai.errors.ApiException;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
 import com.google.genai.types.ThinkingConfig;
+import com.google.genai.types.Tool;
+import com.google.genai.types.UrlContext;
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.exception.GeminiQuotaException;
@@ -28,8 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class GeminiService implements AiService {
     
+    private final GeminiAvailability geminiAvailability;
     private final Client geminiClient;
-
     
     public ResumeData parseResume(String resumeContent) {
 
@@ -78,12 +81,18 @@ public class GeminiService implements AiService {
 
     public JobMatchResponse analyzeJobMatch(String resumeContent, String jobContent) {
         GenerateContentConfig config = GenerateContentConfig.builder()
-                .thinkingConfig(ThinkingConfig.builder().thinkingBudget(0).build())
                 .responseMimeType("application/json")
                 .candidateCount(1)
                 .responseSchema(ServiceConstants.JOB_MATCH_SCHEMA)
+                .tools(
+                        Tool.builder()
+                            .urlContext(
+                                UrlContext.builder().build()
+                            )
+                            .build()
+                    )
                 .build();
-        System.out.println(jobContent);
+                
         String response = sendGeminiReq(config, String.format(ServiceConstants.JOB_MATCH_PROMPT, resumeContent, jobContent), "Job Match Analysis");
 
         try {
@@ -94,41 +103,108 @@ public class GeminiService implements AiService {
         }
     }
 
-    public String sendGeminiReq(GenerateContentConfig config, String prompt, String service) {
-            try {
-                    GenerateContentResponse response =
-                    geminiClient.models.generateContent
-                    ("gemini-2.5-flash", prompt, config);
-                    return response.text();
-            
-            }catch (ApiException e) {
+  public String sendGeminiReq(
+        GenerateContentConfig config,
+        String prompt,
+        String service
+) {
+    GeminiQuotaException lastQuotaException = null;
 
-                        if (e.code() == 429 && "RESOURCE_EXHAUSTED".equals(e.status())) {
+    for (GeminiModel model : GeminiModel.values()) {
 
-                            log.warn(
-                                "Gemini quota/rate limit reached. status={}, message={}",
-                                e.status(),
-                                e.message()
-                            );
+        if (!geminiAvailability.isAvailable(model)) {
+            log.debug(
+                    "Skipping unavailable Gemini model: {}",
+                    model.getModelName()
+            );
+            continue;
+        }
 
-                            throw new GeminiQuotaException(
-                                e.message(),
-                                determineRetryAt(e)
-                            );
-                        }
+        try {
+            return sendRequest(model, config, prompt);
 
-                        log.error(
-                            "Gemini API failed. code={}, status={}, message={}",
-                            e.code(),
-                            e.status(),
-                            e.message(),
-                            e
-                        );
-                    throw new ServiceUnavailableException(service);
+        } catch (ApiException e) {
+
+            if (isQuotaOrRateLimitError(e)) {
+
+                GeminiQuotaException quotaException =
+                        createQuotaException(model, e);
+
+                geminiAvailability.markUnavailable(
+                        model,
+                        quotaException.getRetryAt()
+                );
+
+                lastQuotaException = quotaException;
+
+                continue;
             }
-        
+
+            logGeminiFailure(model, e);
+
+            throw new ServiceUnavailableException(service);
+        }
     }
 
+    if (lastQuotaException != null) {
+        throw lastQuotaException;
+    }
+
+    throw new ServiceUnavailableException(service);
+}
+    private String sendRequest(
+            GeminiModel model,
+            GenerateContentConfig config,
+            String prompt
+    ) {
+        GenerateContentResponse response =
+                geminiClient.models.generateContent(
+                        model.getModelName(),
+                        prompt,
+                        config
+                );
+        log.info("Generated Ai Response from Gemini model {}", model.getModelName());
+        return response.text();
+    }
+
+    private boolean isQuotaOrRateLimitError(ApiException e) {
+    return e.code() == 429
+            && "RESOURCE_EXHAUSTED".equals(e.status());
+}
+private GeminiQuotaException createQuotaException(
+        GeminiModel model,
+        ApiException e
+) {
+    Instant retryAt = determineRetryAt(e);
+
+    log.warn(
+            "Gemini model quota/rate limit reached. " +
+            "model={}, retryAt={}, status={}, message={}",
+            model.getModelName(),
+            retryAt,
+            e.status(),
+            e.message()
+    );
+
+    return new GeminiQuotaException(
+            e.message(),
+            retryAt
+    );
+}
+
+private void logGeminiFailure(
+        GeminiModel model,
+        ApiException e
+) {
+    log.error(
+            "Gemini API failed. model={}, code={}, status={}, message={}",
+            model.getModelName(),
+            e.code(),
+            e.status(),
+            e.message(),
+            e
+    );
+}
     private Instant determineRetryAt(ApiException e) {
     // Gemini's API error information does not always provide
     // a reliable retry timestamp.

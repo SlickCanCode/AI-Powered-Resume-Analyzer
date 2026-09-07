@@ -9,19 +9,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
-import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 
 public interface ResumeAnalysisRepository extends JpaRepository<ResumeAnalysis, UUID> { 
     Optional<ResumeAnalysis> findFirstByResumeIdAndResumeUserId(UUID resumeId, UUID userId);
     void deleteFirstByResumeId(UUID resumeId);
 
     @Query("""
-            select new com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse(
-                resume.id, resume.filename, analysis.createdAt, analysis.overallScore, analysis.atsScore)
+            select new com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse(analysis.id, 
+                resume.id, resume.filename, analysis.overallScore, analysis.atsScore, analysis.createdAt)
             from ResumeAnalysis analysis
             join analysis.resume resume
             where resume.user.id = :userId
             order by analysis.createdAt desc
             """)
-    List<AnalysisSummaryResponse> findAllSummariesByUserId(@Param("userId") UUID userId);
+    List<AnalysisPreviewResponse> findAllSummariesByUserId(@Param("userId") UUID userId);
 } 

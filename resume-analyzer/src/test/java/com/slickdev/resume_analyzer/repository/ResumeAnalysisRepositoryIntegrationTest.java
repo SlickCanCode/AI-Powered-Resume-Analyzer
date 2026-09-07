@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
 import com.slickdev.resume_analyzer.entities.User;
-import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.repositories.ResumeAnalysisRepository;
 import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
@@ -38,12 +38,12 @@ class ResumeAnalysisRepositoryIntegrationTest {
         saveAnalysis(newerResume, 88, 86, LocalDateTime.of(2026, 1, 2, 10, 0));
         saveAnalysis(otherResume, 99, 99, LocalDateTime.of(2026, 1, 3, 10, 0));
 
-        List<AnalysisSummaryResponse> summaries = resumeAnalysisRepository.findAllSummariesByUserId(owner.getId());
+        List<AnalysisPreviewResponse> summaries = resumeAnalysisRepository.findAllSummariesByUserId(owner.getId());
 
         assertEquals(2, summaries.size());
-        assertEquals("newer.pdf", summaries.get(0).resumeName());
-        assertEquals(88, summaries.get(0).score());
-        assertEquals("older.pdf", summaries.get(1).resumeName());
+        assertEquals("newer.pdf", summaries.get(0).getFileName());
+        assertEquals(88, summaries.get(0).getResumeScore());
+        assertEquals("older.pdf", summaries.get(1).getFileName());
     }
 
     private UploadedResume saveResume(User user, String filename) {

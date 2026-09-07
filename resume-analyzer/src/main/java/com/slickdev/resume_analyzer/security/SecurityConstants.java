@@ -18,4 +18,5 @@ public class SecurityConstants {
             "http://localhost:3000",
             "https://ai-powered-resume-analyzer-frontend.vercel.app/"
         );
+    
 }

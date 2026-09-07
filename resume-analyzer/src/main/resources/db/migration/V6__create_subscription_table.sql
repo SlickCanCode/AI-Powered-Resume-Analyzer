@@ -3,10 +3,10 @@ CREATE TABLE subscriptions (
 
     user_id UUID NOT NULL UNIQUE,
 
-    plan subscription_plan NOT NULL DEFAULT 'FREE',
-    status subscription_status NOT NULL DEFAULT 'ACTIVE',
+    plan VARCHAR(50) NOT NULL DEFAULT 'FREE',
+    status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',
 
-    payment_provider payment_provider NOT NULL DEFAULT 'NONE',
+    payment_provider VARCHAR(50) NOT NULL DEFAULT 'NONE',
     provider_subscription_id VARCHAR(255),
 
     current_period_start TIMESTAMP,

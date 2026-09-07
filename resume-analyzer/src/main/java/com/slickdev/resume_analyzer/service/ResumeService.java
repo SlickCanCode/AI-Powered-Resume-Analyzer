@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.slickdev.resume_analyzer.entities.UploadedResume;
-import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.JobMatchResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeAnalysisResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
@@ -22,7 +22,7 @@ public interface ResumeService {
     JobMatchResponse analyzeJobMatch(String id, String jobLink);
     ResumeDataResponse getResumeData(String resumeId, String jwt);
     ResumeAnalysisResponse getResumeAnalyses(String resumeId, String jwt);
-    List<AnalysisSummaryResponse> getAllAnalyses(String jwt);
+    List<AnalysisPreviewResponse> getAllAnalyses(String jwt);
     void deleteResume(String id, String jwt);
     void deleteAnalysis(String id);
 }

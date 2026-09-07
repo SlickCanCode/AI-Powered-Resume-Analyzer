@@ -12,7 +12,7 @@ import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.ApiError;
 
 import com.slickdev.resume_analyzer.requests.LoginRequest;
-import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
+import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationProvider;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.UserService;
 
@@ -25,7 +25,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     
-    private CustomAuthenticationManager authenticationManager;
+    private CustomAuthenticationProvider authenticationProvider;
     private final UserService userService;
     private final JwtService jwtService; 
 
@@ -35,7 +35,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         try {
              LoginRequest loginRequest = new ObjectMapper().readValue(request.getInputStream(), LoginRequest.class);
              Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
-            return authenticationManager.authenticate(authentication);
+            return authenticationProvider.authenticate(authentication);
 
         }catch (IOException e) {
             throw new RuntimeException(e.getMessage());

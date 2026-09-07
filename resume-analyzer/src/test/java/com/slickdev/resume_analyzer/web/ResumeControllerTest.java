@@ -17,11 +17,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.slickdev.resume_analyzer.reponses.AnalysisSummaryResponse;
+import com.slickdev.resume_analyzer.reponses.AnalysisPreviewResponse;
 import com.slickdev.resume_analyzer.reponses.ResumeDataResponse;
 import com.slickdev.resume_analyzer.security.SecurityConfig;
 import com.slickdev.resume_analyzer.security.filters.JWTAuthorizationFilter;
-import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationManager;
+import com.slickdev.resume_analyzer.security.manager.CustomAuthenticationProvider;
 import com.slickdev.resume_analyzer.service.JwtService;
 import com.slickdev.resume_analyzer.service.OAuth2SuccessHandler;
 import com.slickdev.resume_analyzer.service.ResumeService;
@@ -50,7 +50,7 @@ import jakarta.servlet.http.Cookie;
 class ResumeControllerTest {
     @Autowired private MockMvc mockMvc;
     @MockBean private ResumeService resumeService;
-    @MockBean private CustomAuthenticationManager customAuthenticationManager;
+    @MockBean private CustomAuthenticationProvider customAuthenticationProvider;
     @MockBean private UserService userService;
     @MockBean private JwtService jwtService;
     @MockBean private OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -58,12 +58,14 @@ class ResumeControllerTest {
 
     @Test
     void getAllAnalysesReturnsOnlySummaryFields() throws Exception {
-        AnalysisSummaryResponse summary = new AnalysisSummaryResponse(
-                UUID.fromString("87654321-1234-1234-1234-1234567890ab"),
+        AnalysisPreviewResponse summary = new AnalysisPreviewResponse(
+                "87654321-1234-1234-1234-1234567890ab",
+                "87654321-1234-1234-1234-1234567890ab",
                 "resume.pdf",
-                LocalDateTime.of(2026, 1, 1, 9, 0),
                 82,
-                79
+                79,
+                LocalDateTime.of(2026, 1, 1, 9, 0).toString()
+
         );
         when(resumeService.getAllAnalyses("jwt")).thenReturn(List.of(summary));
 
