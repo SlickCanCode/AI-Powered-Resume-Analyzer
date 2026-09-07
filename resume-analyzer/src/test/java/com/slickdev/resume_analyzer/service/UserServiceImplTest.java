@@ -21,7 +21,6 @@ import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
 import com.slickdev.resume_analyzer.exception.UserNotFound;
 import com.slickdev.resume_analyzer.repositories.UserRepository;
 import com.slickdev.resume_analyzer.requests.UpdateuserRequest;
-import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,7 +60,6 @@ class UserServiceImplTest {
         User existing = new User("Ada", "Lovelace", user.getEmail(), "encoded");
         existing.setEmailVerified(true);
         when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(existing));
 
         assertThrows(DuplicateResourceException.class, () -> userService.saveUser(user));
     }

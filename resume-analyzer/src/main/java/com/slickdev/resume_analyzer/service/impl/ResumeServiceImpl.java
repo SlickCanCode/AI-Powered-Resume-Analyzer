@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
-import com.drew.lang.annotations.NotNull;
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
 import com.slickdev.resume_analyzer.entities.ResumeData;
 import com.slickdev.resume_analyzer.entities.UploadedResume;
@@ -39,11 +38,8 @@ import com.slickdev.resume_analyzer.repositories.ResumeRepository;
 import com.slickdev.resume_analyzer.service.ResumeService;
 import com.slickdev.resume_analyzer.service.SubscriptionService;
 import com.slickdev.resume_analyzer.service.ai.AiModelRouter;
-import com.slickdev.resume_analyzer.service.ai.OpenAiService;
-import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiService;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

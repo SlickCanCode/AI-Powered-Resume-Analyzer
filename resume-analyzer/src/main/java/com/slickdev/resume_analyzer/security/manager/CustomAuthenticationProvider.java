@@ -1,8 +1,5 @@
 package com.slickdev.resume_analyzer.security.manager;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,8 +12,6 @@ import com.slickdev.resume_analyzer.entities.User;
 
 import com.slickdev.resume_analyzer.service.impl.UserServiceImpl;
 
-
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 @Component 

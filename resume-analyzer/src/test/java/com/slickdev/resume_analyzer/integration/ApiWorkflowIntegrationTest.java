@@ -66,7 +66,6 @@ import com.slickdev.resume_analyzer.service.impl.OtpServiceImpl;
 class ApiWorkflowIntegrationTest {
 
     @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper;
     @Autowired private UserRepository userRepository;
     @Autowired private ResumeRepository resumeRepository;
     @Autowired private ResumeDataRepository resumeDataRepository;
