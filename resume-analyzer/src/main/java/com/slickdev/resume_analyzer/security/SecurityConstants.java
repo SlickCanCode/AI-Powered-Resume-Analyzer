@@ -1,7 +1,7 @@
 package com.slickdev.resume_analyzer.security;
 
 import java.time.Duration;
-import java.util.List;
+import java.util.Optional;
 
 
 public class SecurityConstants {
@@ -14,6 +14,6 @@ public class SecurityConstants {
     public static final String REGISTER_PATH = "/api/v1/users"; // Public path that clients can use to register.
     public static final String RESUME_UPLOAD_PATH = "/resume/upload";
     public static final String RESUME_ANALYZE_PATH = "/resume/analyze/**";
-    public static final String ALLOWED_ORIGIN = System.getenv("FRONTEND_URL");
+    public static final String ALLOWED_ORIGIN = Optional.ofNullable(System.getenv("FRONTEND_URL")).orElse("http://localhost:3000");
     
 }

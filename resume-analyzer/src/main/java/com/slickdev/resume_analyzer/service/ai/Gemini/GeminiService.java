@@ -1,6 +1,5 @@
 package com.slickdev.resume_analyzer.service.ai.Gemini;
 
-import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiAvailability;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -12,7 +11,6 @@ import com.google.genai.Client;
 import com.google.genai.errors.ApiException;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
-import com.google.genai.types.ThinkingConfig;
 import com.google.genai.types.Tool;
 import com.google.genai.types.UrlContext;
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
