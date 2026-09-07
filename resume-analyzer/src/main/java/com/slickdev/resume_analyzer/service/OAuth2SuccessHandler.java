@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.slickdev.resume_analyzer.entities.User;
 import com.slickdev.resume_analyzer.exception.DuplicateResourceException;
+import com.slickdev.resume_analyzer.security.SecurityConstants;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,8 +46,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             user = userService.saveUser(new User(googleuser.getAttribute("given_name"), googleuser.getAttribute("family_name"), googleuser.getAttribute("email"),true));
         } catch (DuplicateResourceException e) {
             user = userService.getUserByEmail(googleuser.getAttribute("email"));
+        } catch (Exception e) {
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred while processing the request.");
+            return;
         }
         jwtService.sendRefreshAndAccessTokens(response, user);
-        response.sendRedirect("http://localhost:3000/dashboard");
+        response.sendRedirect(SecurityConstants.ALLOWED_ORIGIN + "/dashboard");
 }
 }

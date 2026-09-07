@@ -131,7 +131,7 @@ public SecurityFilterChain oauthSecurityFilterChain(HttpSecurity http) throws Ex
      @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(SecurityConstants.ALLOWED_ORIGINS);
+        config.setAllowedOrigins(List.of(SecurityConstants.ALLOWED_ORIGIN));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

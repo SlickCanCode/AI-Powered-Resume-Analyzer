@@ -14,9 +14,6 @@ public class SecurityConstants {
     public static final String REGISTER_PATH = "/api/v1/users"; // Public path that clients can use to register.
     public static final String RESUME_UPLOAD_PATH = "/resume/upload";
     public static final String RESUME_ANALYZE_PATH = "/resume/analyze/**";
-    public static final List<String> ALLOWED_ORIGINS = List.of(
-            "http://localhost:3000",
-            "https://ai-powered-resume-analyzer-frontend.vercel.app/"
-        );
+    public static final String ALLOWED_ORIGIN = System.getenv("FRONTEND_URL");
     
 }

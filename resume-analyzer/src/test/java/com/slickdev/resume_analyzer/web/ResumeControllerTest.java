@@ -72,8 +72,8 @@ class ResumeControllerTest {
         mockMvc.perform(get("/api/v1/resumes/analyses")
                 .cookie(new Cookie("access_token", "jwt")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].resumeName").value("resume.pdf"))
-                .andExpect(jsonPath("$[0].score").value(82))
+                .andExpect(jsonPath("$[0].fileName").value("resume.pdf"))
+                .andExpect(jsonPath("$[0].resumeScore").value(82))
                 .andExpect(jsonPath("$[0].atsScore").value(79));
     }
 
