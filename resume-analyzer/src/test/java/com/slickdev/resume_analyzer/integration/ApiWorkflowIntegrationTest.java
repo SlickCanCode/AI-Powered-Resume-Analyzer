@@ -40,9 +40,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slickdev.resume_analyzer.entities.ResumeAnalysis;
@@ -59,9 +64,9 @@ import com.slickdev.resume_analyzer.service.ai.Gemini.GeminiService;
 import com.slickdev.resume_analyzer.service.impl.JwtServiceImpl;
 import com.slickdev.resume_analyzer.service.impl.OtpServiceImpl;
 
+@Testcontainers 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("dev")
 @Transactional
 class ApiWorkflowIntegrationTest {
 
@@ -75,6 +80,20 @@ class ApiWorkflowIntegrationTest {
 
     @MockBean private GeminiService geminiService;
     @SpyBean private OtpServiceImpl otpService;
+
+    @Container 
+    static PostgreSQLContainer<?> postgres =
+        new PostgreSQLContainer<>("postgres:16")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
 
     @BeforeEach
     void setUp() {

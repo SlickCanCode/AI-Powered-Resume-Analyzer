@@ -10,10 +10,7 @@ COPY .mvn .mvn
 COPY src ./src
 
 
-# Run tests as part of the build (fails the build if tests fail)
-RUN ./mvnw test
-
-# Package the application (skip re-running tests since we just ran them)
+# Package the application (skip re-running tests because of CI)
 RUN ./mvnw package -DskipTests
 
 # ---- Runtime stage ----
