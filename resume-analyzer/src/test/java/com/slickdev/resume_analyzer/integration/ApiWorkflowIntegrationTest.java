@@ -67,6 +67,7 @@ import com.slickdev.resume_analyzer.service.impl.OtpServiceImpl;
 @Testcontainers 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @Transactional
 class ApiWorkflowIntegrationTest {
 
