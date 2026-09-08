@@ -25,4 +25,4 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: mvn -B clean verify
+        run: mvn -B clean verify --file resume-analyzer/pom.xml
