@@ -313,7 +313,9 @@ public class ResumeServiceImpl implements ResumeService{
             subscriptionService.incrementAnalysisUsage(userId);  
             resume.increaseAnalysisCount();    
             // Increment subscription usage
-            subscriptionService.incrementAnalysisUsage(userId);    
+            subscriptionService.incrementAnalysisUsage(userId); 
+            log.info("Job Match complete for user named {}", resume.getUser().getFirstName());
+   
             return response;
         } catch (JobPostingExtractor.JobPageUnavailableException exception) {
             log.info("Could not parse the job url: {}", jobLink);
@@ -323,6 +325,7 @@ public class ResumeServiceImpl implements ResumeService{
             resume.increaseAnalysisCount();
             // Increment subscription usage
             subscriptionService.incrementAnalysisUsage(userId);
+            log.info("Job Match complete for user named {}", resume.getUser().getFirstName());
             return response;
         }
     }

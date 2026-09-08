@@ -51,7 +51,7 @@ public class OtpServiceImpl implements OtpService {
 
     @Override
     public String generateOtp(User user) {
-        List<VerificationToken> userTokens = user.getTokens();
+        List<VerificationToken> userTokens = tokenRepository.findAllByUser(user);
         VerificationToken lastToken = null;
         if (!userTokens.isEmpty() && userTokens != null) {
             lastToken = userTokens.get(userTokens.size() - 1);
