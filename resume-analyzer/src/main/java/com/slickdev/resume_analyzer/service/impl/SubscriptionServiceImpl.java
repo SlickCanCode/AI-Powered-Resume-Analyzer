@@ -132,7 +132,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public int getAnalysesAllowed(String userId) {
         checkSubscription(userId);
         SubscriptionUsage usage = getSubscriptionUsage(userId);
-        return usage.getResumesAnalysesAllowed()-usage.getResumeAnalysesUsed();
+        return usage.getResumesAnalysesAllowed();
     }
 
     /**
