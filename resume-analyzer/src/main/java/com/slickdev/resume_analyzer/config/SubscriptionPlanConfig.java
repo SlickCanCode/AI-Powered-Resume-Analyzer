@@ -8,7 +8,7 @@ import com.slickdev.resume_analyzer.entities.enums.SubscriptionPlan;
  * Easy to change: Simply modify values here for new plan configurations.
  */
 public enum SubscriptionPlanConfig {
-    FREE(SubscriptionPlan.FREE, 5, "Free tier with 5 monthly analyses"),
+    FREE(SubscriptionPlan.FREE, 15, "Free tier with 15 monthly analyses"),
     PRO(SubscriptionPlan.PRO, 25, "Professional tier with 25 monthly analyses");
 
     private final SubscriptionPlan plan;
